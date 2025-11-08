@@ -1,0 +1,52 @@
+/* src/app/components/login/login.css */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border-radius: 8px;
+}
+
+mat-card-title {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+mat-card-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+button[mat-raised-button] {
+  width: 100%;
+  padding: 10px 0;
+  font-size: 16px;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+mat-card-actions a {
+  text-decoration: none;
+  color: var(--primary-color);
+  transition: color 0.3s ease;
+}
+
+mat-card-actions a:hover {
+  color: var(--accent-color);
+}
