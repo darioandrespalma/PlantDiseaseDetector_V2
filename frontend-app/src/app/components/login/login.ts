@@ -1,67 +1,96 @@
 // src/app/components/login/login.ts
-import { Component } from '@angular/core';
+import { Component, HostBinding, OnDestroy } from '@angular/core';
+import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth'; // Ajustado
-import { WebsocketService } from '../../services/websocket'; // Ajustado
-import { ToastrService } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
-// --- Importaciones de Angular Material ---
+// Services
+import { AuthService } from '../../services/auth';
+import { WebsocketService } from '../../services/websocket';
+import { ToastrService } from 'ngx-toastr';
+import { ThemeService } from '../../services/theme';
+
+// Angular Material (sub-paquetes)
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+// Animaciones
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
-    RouterLink,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule
+    CommonModule, RouterLink, ReactiveFormsModule,
+    MatCardModule, MatFormFieldModule, MatInputModule,
+    MatButtonModule, MatIconModule, MatProgressSpinnerModule
   ],
-  templateUrl: './login.html', // Ajustado
-  styleUrls: ['./login.css']   // Ajustado
+  templateUrl: './login.html',
+  styleUrls: ['./login.css'],
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(10px)' }),
+        animate('600ms cubic-bezier(.4,0,.2,1)', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
 })
-export class LoginComponent {
-  loginForm: FormGroup;
+export class LoginComponent implements OnDestroy {
+  @HostBinding('class.dark') dark = true;
+
+  form!: FormGroup;
+  hide = true;
   isLoading = false;
+
+  private themeSub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService,
-    private wsService: WebsocketService,
+    private auth: AuthService,
+    private ws: WebsocketService,
     private router: Router,
-    private toastr: ToastrService
+    private toast: ToastrService,        // 👈 COMA AQUÍ
+    private theme: ThemeService          // 👈 INYECTADO
   ) {
-    this.loginForm = this.fb.group({
+    this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
+
+    // Sincroniza con ThemeService (persistente entre pantallas)
+    this.dark = this.theme.isDark();
+    this.themeSub = this.theme.dark$.subscribe(v => (this.dark = v));
   }
 
-  onSubmit(): void {
-    if (this.loginForm.invalid) {
+  toggleDark() { this.theme.toggle(); }  // 👈 usa el servicio, no solo variable local
+
+  submit() {
+    if (this.form.invalid) {
+      this.toast.warning('Completa los campos correctamente');
+      this.form.markAllAsTouched();
       return;
     }
-
     this.isLoading = true;
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.toastr.success('¡Bienvenido!', 'Inicio de sesión exitoso');
-        this.wsService.connect(); // Conectar al WebSocket
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.toastr.error(err.error.message || 'Error al iniciar sesión', 'Error');
-      }
-    });
+    this.auth.login(this.form.value)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: () => {
+          this.toast.success('Bienvenido 🌿');
+          this.ws.connect();
+          this.router.navigate(['/dashboard']);
+        },
+        error: err => this.toast.error(err?.error?.message || 'Error al iniciar sesión')
+      });
+  }
+
+  ngOnDestroy() {
+    this.themeSub?.unsubscribe();
   }
 }

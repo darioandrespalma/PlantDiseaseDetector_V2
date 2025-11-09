@@ -1,52 +1,103 @@
 /* src/app/components/register/register.css */
+
+/* Fondo y contenedor (igual que login para coherencia visual) */
+.background {
+  position: fixed; inset: 0;
+  background: radial-gradient(900px 600px at 8% 12%, rgba(46,125,50,.10) 0%, transparent 60%),
+              radial-gradient(700px 480px at 88% 20%, rgba(30,136,229,.10) 0%, transparent 60%),
+              linear-gradient(135deg, #eef5ff 0%, #ffffff 60%);
+  animation: subtleShift 18s ease-in-out infinite alternate;
+  z-index: -2;
+}
+@keyframes subtleShift {
+  from { filter: hue-rotate(0deg) saturate(1); }
+  to   { filter: hue-rotate(10deg) saturate(1.05); }
+}
+
 .container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
 }
 
-.register-card { /* Cambiado de .login-card */
+/* Card principal */
+.register-card {
   width: 100%;
-  max-width: 400px;
-  padding: 20px;
-  box-shadow: var(--shadow);
-  border-radius: 8px;
+  max-width: 480px;
+  border-radius: 18px;
+  box-shadow: 0 14px 35px rgba(0,0,0,0.12);
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(10px) saturate(1.2);
+  overflow: hidden;
+  animation: cardPop 300ms ease both;
+}
+@keyframes cardPop {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
 }
 
-mat-card-title {
-  font-size: 24px;
-  font-weight: 500;
-}
+mat-card-title { font-weight: 700; }
+mat-card-subtitle { margin-top: 2px; letter-spacing: .2px; }
 
+/* Form */
 mat-card-content form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
 }
+mat-form-field { width: 100%; }
 
-mat-form-field {
-  width: 100%;
+/* Strength meter */
+.strength {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px;
 }
+.strength .label { font-size: .9rem; color: #9aa3af; }
+.strength .label.good { color: #2e7d32; }
+.strength .label.strong { color: #1b5e20; font-weight: 600; }
 
-button[mat-raised-button] {
-  width: 100%;
-  padding: 10px 0;
-  font-size: 16px;
-}
+/* Checkbox y hint */
+mat-checkbox { margin-top: 4px; }
+.hint { font-size: .85rem; color: #6b7280; }
 
-mat-card-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 15px;
+/* Botón */
+.submit-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 12px 0; border-radius: 12px; font-size: 16px;
+  transition: transform .18s ease, box-shadow .18s ease;
 }
+.submit-btn:not([disabled]):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(30,136,229,.25);
+}
+.loading-text { font-size: 14px; }
 
-mat-card-actions a {
-  text-decoration: none;
-  color: var(--primary-color);
-  transition: color 0.3s ease;
+/* Link a login */
+.switch {
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+  margin-top: 4px; font-size: .95rem;
 }
+.switch a { color: #1e88e5; text-decoration: none; }
+.switch a:hover { text-decoration: underline; }
 
-mat-card-actions a:hover {
-  color: var(--accent-color);
+/* Focus visible */
+button[mat-icon-button]:focus-visible,
+button[mat-raised-button]:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(30,136,229,.3);
+  outline-offset: 2px;
 }
+/* …tu CSS actual… */
+
+/* ===== Modo oscuro ===== */
+:host.dark .background{
+  background: radial-gradient(900px 600px at 8% 12%, rgba(76,175,80,.15) 0%, transparent 60%),
+              radial-gradient(700px 480px at 88% 20%, rgba(66,165,245,.12) 0%, transparent 60%),
+              linear-gradient(135deg, #0f1318 0%, #12181f 60%);
+}
+:host.dark .register-card{
+  background: rgba(20,22,28,.82);
+  color: #e5e7eb;
+  box-shadow: 0 20px 50px rgba(0,0,0,.5);
+}
+:host.dark .switch a{ color:#90caf9; }

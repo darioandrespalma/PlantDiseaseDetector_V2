@@ -1,41 +1,58 @@
-<div class="container">
+<div class="background"></div>
+
+<div class="container" [@fadeIn]>
   <mat-card class="login-card">
+    <div class="top-actions">
+      <button mat-icon-button (click)="toggleDark()" aria-label="Cambiar tema">
+        <mat-icon>{{ dark ? 'dark_mode' : 'light_mode' }}</mat-icon>
+      </button>
+    </div>
+
     <mat-card-header>
       <mat-card-title>Iniciar Sesión</mat-card-title>
       <mat-card-subtitle>Plant Disease Detector v2</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        
+      <form [formGroup]="form" (ngSubmit)="submit()">
         <mat-form-field appearance="outline">
-          <mat-label>Correo Electrónico</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="tu@correo.com">
-          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+          <mat-label>Correo electrónico</mat-label>
+          <input matInput type="email" formControlName="email" />
+          <mat-icon matSuffix>alternate_email</mat-icon>
+          <mat-error *ngIf="form.get('email')?.hasError('required')">
             El correo es requerido
           </mat-error>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-            Formato de correo inválido
+          <mat-error *ngIf="form.get('email')?.hasError('email')">
+            Formato inválido
           </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Contraseña</mat-label>
-          <input matInput formControlName="password" type="password">
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-            La contraseña es requerida
+          <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" />
+          <button mat-icon-button matSuffix type="button" (click)="hide = !hide">
+            <mat-icon>{{ hide ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="form.get('password')?.hasError('required')">
+            Contraseña requerida
           </mat-error>
         </mat-form-field>
 
-        <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid || isLoading">
-          {{ isLoading ? 'Cargando...' : 'Entrar' }}
+        <button mat-raised-button color="primary" type="submit"
+                [disabled]="form.invalid || isLoading">
+          <ng-container *ngIf="!isLoading; else loading">Entrar</ng-container>
+          <ng-template #loading>
+            <mat-progress-spinner diameter="20" strokeWidth="3" mode="indeterminate"></mat-progress-spinner>
+            Cargando...
+          </ng-template>
         </button>
 
+        <div class="links">
+          <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+          <span>•</span>
+          <a routerLink="/register">Registrarse</a>
+        </div>
       </form>
     </mat-card-content>
-
-    <mat-card-actions>
-      <a routerLink="/register">¿No tienes cuenta? Regístrate</a>
-    </mat-card-actions>
   </mat-card>
 </div>
