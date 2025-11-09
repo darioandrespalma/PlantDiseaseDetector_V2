@@ -1,87 +1,45 @@
-/* src/app/components/dashboard/dashboard.css */
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+.lunar-widget-container {
+  margin-bottom: 24px;
 }
 
-.toolbar h1 {
-  font-size: 20px;
+.dashboard-title {
+  font-size: 22px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.cultivo-card {
+  width: 100%;
+}
+
+mat-card-image {
+  height: 200px;
+  object-fit: cover;
+}
+
+mat-card-title {
+  font-size: 18px;
   font-weight: 500;
 }
 
-.container {
-  padding: 30px;
+mat-card-content p {
+  font-size: 14px;
+  color: #555;
+  min-height: 40px; /* Asegura altura uniforme */
+}
+
+mat-card-actions {
+  padding: 16px !important;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+  justify-content: flex-end;
 }
 
-.upload-card, .result-card {
-  width: 100%;
-  max-width: 600px;
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-}
-
-/* Animación de entrada para la tarjeta de resultado */
-.result-card {
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-mat-card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* --- Botón de "Upload" con estilo --- */
-input[type="file"] {
-  display: none;
-}
-
-.file-upload-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 15px;
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  cursor: pointer;
+button[mat-flat-button] {
   transition: all 0.3s ease;
 }
 
-.file-upload-label:hover {
-  border-color: var(--primary-color);
-  background: #f9f9f9;
-}
-
-.file-upload-label.loading {
-  cursor: not-allowed;
-  background: #eee;
-}
-
-.file-upload-label mat-icon {
-  color: var(--primary-color);
-}
-/* --------------------------------- */
-
-button[mat-raised-button] {
-  padding: 10px 0;
-  font-size: 16px;
-}
-
-pre {
-  background: #f4f4f4;
-  padding: 15px;
-  border-radius: 8px;
-  white-space: pre-wrap; /* Para que el texto se ajuste */
-  font-family: 'Roboto Mono', monospace;
+button[mat-flat-button]:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }

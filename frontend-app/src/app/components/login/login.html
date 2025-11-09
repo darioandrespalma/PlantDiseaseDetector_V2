@@ -1,6 +1,13 @@
 <div class="background"></div>
 
 <div class="container" [@fadeIn]>
+  <!-- Título principal animado fuera de la tarjeta -->
+  <div class="app-title animated-text">
+    <span class="letter">P</span><span class="letter">l</span><span class="letter">a</span><span class="letter">n</span><span class="letter">t</span>
+    <span class="letter" style="margin-left: 10px;">D</span><span class="letter">i</span><span class="letter">s</span><span class="letter">e</span><span class="letter">a</span><span class="letter">s</span><span class="letter">e</span>
+    <span class="letter" style="margin-left: 10px;">D</span><span class="letter">e</span><span class="letter">t</span><span class="letter">e</span><span class="letter">c</span><span class="letter">t</span><span class="letter">o</span><span class="letter">r</span>
+  </div>
+
   <mat-card class="login-card">
     <div class="top-actions">
       <button mat-icon-button (click)="toggleDark()" aria-label="Cambiar tema">
@@ -10,7 +17,6 @@
 
     <mat-card-header>
       <mat-card-title>Iniciar Sesión</mat-card-title>
-      <mat-card-subtitle>Plant Disease Detector v2</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>

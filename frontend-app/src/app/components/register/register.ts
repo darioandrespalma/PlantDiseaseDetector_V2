@@ -48,7 +48,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
   ]
 })
 export class RegisterComponent implements OnDestroy {
-  @HostBinding('class.dark') dark = true;
+  @HostBinding('class.dark') dark = false;
 
   private themeSub?: Subscription;
 

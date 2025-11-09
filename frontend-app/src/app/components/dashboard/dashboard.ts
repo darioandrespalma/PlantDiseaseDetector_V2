@@ -1,98 +1,67 @@
-// src/app/components/dashboard/dashboard.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth'; // Ajustado
-import { PredictService } from '../../services/predict'; // Ajustado
-import { WebsocketService } from '../../services/websocket'; // Ajustado
-import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { trigger, transition, style, animate, query, stagger } from '@angular/animations'; // Importa animaciones
 
 // --- Importaciones de Angular Material ---
-import { MatButtonModule } from '@angular/material/button';
+import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar'; // Añadido
-import { MatTooltipModule } from '@angular/material/tooltip'; // Añadido
-import { CommonModule} from '@angular/common';
+
+// Importa el nuevo componente Lunar
+import { LunarCalendarComponent } from '../lunar-calendar/lunar-calendar';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
+    MatGridListModule,
     MatCardModule,
-    MatProgressBarModule,
+    MatButtonModule,
     MatIconModule,
-    MatToolbarModule, // Añadido
-    MatTooltipModule  // Añadido
+    LunarCalendarComponent // Añade el componente lunar
   ],
-  templateUrl: './dashboard.html', // Ajustado
-  styleUrls: ['./dashboard.css']   // Ajustado
+  templateUrl: './dashboard.html',
+  styleUrls: ['./dashboard.css'],
+  // --- Define la animación de "stagger" (escalonado) ---
+  animations: [
+    trigger('listAnimation', [
+      transition('* => *', [ // Cada vez que la lista cambia
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(20px)' }),
+          stagger('100ms', [
+            animate('0.5s cubic-bezier(0.25, 0.8, 0.25, 1)', 
+              style({ opacity: 1, transform: 'none' }))
+          ])
+        ], { optional: true })
+      ])
+    ])
+  ]
 })
-export class DashboardComponent implements OnInit, OnDestroy {
-  selectedFile: File | null = null;
-  selectedFileName = '';
-  isLoading = false;
-  predictionResult: any = null;
-  wsSubscription: Subscription;
-
-  constructor(
-    private authService: AuthService,
-    private predictService: PredictService,
-    private wsService: WebsocketService,
-    private router: Router,
-    private toastr: ToastrService
-  ) {
-    this.wsSubscription = new Subscription();
-  }
-
-  ngOnInit(): void {
-    // Escuchar los resultados de predicción del WebSocket
-    this.wsSubscription = this.wsService.listen('prediction_result').subscribe((data: any) => {
-      this.isLoading = false;
-      this.predictionResult = data;
-      this.toastr.success('¡Análisis completado!', 'Predicción recibida');
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.wsSubscription.unsubscribe();
-  }
-
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-      this.selectedFileName = file.name;
-      this.predictionResult = null; // Limpiar resultado anterior
+export class DashboardComponent {
+  
+  // Lista de cultivos
+  cultivos = [
+    {
+      nombre: 'Detección de banano',
+      descripcion: 'Detecta enfermedades como el Sigatoka negra y el moko.',
+      imagen: 'assets/images/banano.jpg', // Necesitarás crear esta carpeta y añadir imágenes
+      icono: 'assets/icons/banana-icon.png'
+    },
+    {
+      nombre: 'Detección de arroz',
+      descripcion: 'Identifica problemas como el tizón del arroz o la mancha marrón.',
+      imagen: 'assets/images/arroz.jpg',
+      icono: 'assets/icons/rice-icon.png'
+    },
+    {
+      nombre: 'Detección de café',
+      descripcion: 'Diagnóstico de la roya del café y la antracnosis.',
+      imagen: 'assets/images/cafe.jpg',
+      icono: 'assets/icons/coffee-icon.png'
     }
-  }
+  ];
 
-  onUpload(): void {
-    if (!this.selectedFile) {
-      this.toastr.warning('Por favor, selecciona un archivo primero.', 'Archivo no seleccionado');
-      return;
-    }
-
-    this.isLoading = true;
-    this.predictService.uploadImage(this.selectedFile).subscribe({
-      next: (response) => {
-        // La respuesta HTTP 201 solo confirma la subida.
-        // El resultado real vendrá por el WebSocket.
-        this.toastr.info('Imagen subida. Procesando análisis...', 'En progreso');
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.toastr.error(err.error.message || 'Error al subir la imagen.', 'Error');
-      }
-    });
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.wsService.disconnect();
-    this.router.navigate(['/login']);
-  }
+  constructor() { }
 }

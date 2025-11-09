@@ -22,6 +22,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Animaciones
 import { trigger, transition, style, animate } from '@angular/animations';
+import { FixedSizeVirtualScrollStrategy } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'app-login',
@@ -43,7 +44,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
   ]
 })
 export class LoginComponent implements OnDestroy {
-  @HostBinding('class.dark') dark = true;
+  @HostBinding('class.dark') dark = false;
 
   form!: FormGroup;
   hide = true;
