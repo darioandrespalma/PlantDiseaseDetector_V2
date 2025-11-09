@@ -1,13 +1,18 @@
-// routes/auth.js
 const express = require('express');
 const router = express.Router();
-const { register, login } = require('../controllers/authController');
+const { register, login, forgotPassword, resetPassword } = require('../controllers/authController');
 const { loginLimiter } = require('../middleware/rateLimiters');
 
-// Register new user (sin rate limit, pero podrías agregarlo si lo deseas)
+// Register new user
 router.post('/register', register);
 
-// Login user (con protección contra bruteforce)
+// Login user
 router.post('/login', loginLimiter, login);
+
+// Forgot Password
+router.post('/forgot-password', forgotPassword);
+
+// Reset Password
+router.post('/reset-password', resetPassword);
 
 module.exports = router;
