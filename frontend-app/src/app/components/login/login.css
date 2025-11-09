@@ -4,99 +4,152 @@
   overflow: hidden;
 }
 
-/* Fondo dinámico */
+/* Fondo dinámico - más suave y cercano a la imagen */
 .background {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at 20% 20%, rgba(46,125,50,.15), transparent 60%),
-              radial-gradient(circle at 80% 80%, rgba(30,136,229,.15), transparent 60%),
-              linear-gradient(135deg, #eef5ff, #ffffff 60%);
-  background-size: 120% 120%;
+  background: linear-gradient(135deg, #e8f5e9, #e3f2fd); /* Verde claro + Azul claro */
   animation: hueShift 16s ease-in-out infinite alternate;
   z-index: -1;
 }
+
 @keyframes hueShift {
   from { filter: hue-rotate(0deg); }
-  to { filter: hue-rotate(20deg); }
+  to { filter: hue-rotate(5deg); } /* Menos intensidad para que sea más sutil */
 }
 
-/* Centrado */
+/* Centrado del contenido */
 .container {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   height: 100%;
   padding: 1rem;
+  gap: 1rem; /* Espacio entre título y tarjeta */
 }
 
-/* Tarjeta principal */
+/* Título principal - estilo limpio, centrado, como en la imagen */
+.app-title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 1px;
+  animation: fadeInTitle 800ms ease-out;
+}
+
+@keyframes fadeInTitle {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tarjeta de login */
 .login-card {
-  width: min(420px, 90vw);
-  border-radius: 18px;
-  box-shadow: 0 14px 35px rgba(0,0,0,0.12);
-  backdrop-filter: blur(10px) saturate(1.2);
-  background-color: rgba(255,255,255,0.8);
+  width: min(400px, 90vw);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background-color: white;
+  padding: 1.5rem;
   animation: slideUp 600ms ease both;
 }
+
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.top-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding: 4px 6px 0 0;
+/* Campos de formulario - estilo "fill" para coincidir con la imagen */
+.full-width {
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
-/* Campos */
-mat-form-field {
-  width: 100%;
-  transition: box-shadow .2s ease;
-}
-mat-form-field.mat-focused {
-  box-shadow: 0 0 0 3px rgba(30,136,229,.2);
-  border-radius: 10px;
+/* Estilos específicos para los campos fill */
+mat-form-field.mat-focused .mat-mdc-form-field-label {
+  color: #1e88e5 !important;
 }
 
-/* Botón */
-button[mat-raised-button] {
+mat-form-field.mat-focused .mat-mdc-form-field-outline-thick {
+  border-color: #1e88e5 !important;
+}
+
+/* Botón de login - estilo plano y moderno */
+.login-button {
   width: 100%;
-  margin-top: .3rem;
+  margin-top: 1rem;
   padding: 12px 0;
   font-size: 1rem;
-  border-radius: 12px;
-  transition: transform .15s ease, box-shadow .2s ease;
-}
-button[mat-raised-button]:not([disabled]):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(30,136,229,.25);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
-/* Links */
+.login-button:not([disabled]):hover {
+  background-color: rgba(30, 136, 229, 0.1);
+  transform: translateY(-1px);
+}
+
+.login-button[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Links inferiores */
 .links {
-  margin-top: 8px;
+  margin-top: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  font-size: .9rem;
+  gap: 1rem;
+  font-size: 0.9rem;
+  flex-wrap: wrap; /* Para móviles */
 }
+
 .links a {
   color: #1e88e5;
   text-decoration: none;
-  transition: color .2s;
+  transition: color 0.2s;
+  font-weight: 500;
 }
-.links a:hover { color: #1565c0; }
 
-/* Dark theme toggle */
+.links a:hover {
+  color: #1565c0;
+  text-decoration: underline;
+}
+
+/* Tema Oscuro - Ajustes mínimos para mantener la coherencia */
 :host.dark .background {
-  background: radial-gradient(circle at 20% 20%, rgba(76,175,80,.15), transparent 60%),
-              radial-gradient(circle at 80% 80%, rgba(66,165,245,.15), transparent 60%),
-              linear-gradient(135deg, #0f1318, #12181f 60%);
+  background: linear-gradient(135deg, #1b5e20, #0d47a1); /* Verde oscuro + Azul oscuro */
+  animation: hueShiftDark 16s ease-in-out infinite alternate;
 }
+
+@keyframes hueShiftDark {
+  from { filter: hue-rotate(0deg); }
+  to { filter: hue-rotate(5deg); }
+}
+
 :host.dark .login-card {
-  background-color: rgba(20,20,25,0.8);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.5);
-  color: #e0e0e0;
+  background-color: #1e1e1e;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
 }
-:host.dark a { color: #90caf9; }
+
+:host.dark .app-title {
+  color: #ffffff;
+}
+
+:host.dark .links a {
+  color: #90caf9;
+}
+
+:host.dark .links a:hover {
+  color: #64b5f6;
+}
+
+/* Asegurar que los íconos de Material se vean bien en tema oscuro */
+:host.dark mat-icon {
+  color: #ffffff;
+}

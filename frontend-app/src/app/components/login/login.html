@@ -1,19 +1,11 @@
 <div class="background"></div>
 
 <div class="container" [@fadeIn]>
-  <!-- Título principal animado fuera de la tarjeta -->
-  <div class="app-title animated-text">
-    <span class="letter">P</span><span class="letter">l</span><span class="letter">a</span><span class="letter">n</span><span class="letter">t</span>
-    <span class="letter" style="margin-left: 10px;">D</span><span class="letter">i</span><span class="letter">s</span><span class="letter">e</span><span class="letter">a</span><span class="letter">s</span><span class="letter">e</span>
-    <span class="letter" style="margin-left: 10px;">D</span><span class="letter">e</span><span class="letter">t</span><span class="letter">e</span><span class="letter">c</span><span class="letter">t</span><span class="letter">o</span><span class="letter">r</span>
-  </div>
+
+  <!-- Título principal (estilo simple y centrado, como en la imagen) -->
+  <h1 class="app-title">Plant Disease Detector</h1>
 
   <mat-card class="login-card">
-    <div class="top-actions">
-      <button mat-icon-button (click)="toggleDark()" aria-label="Cambiar tema">
-        <mat-icon>{{ dark ? 'dark_mode' : 'light_mode' }}</mat-icon>
-      </button>
-    </div>
 
     <mat-card-header>
       <mat-card-title>Iniciar Sesión</mat-card-title>
@@ -21,8 +13,10 @@
 
     <mat-card-content>
       <form [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field appearance="outline">
-          <mat-label>Correo electrónico</mat-label>
+
+        <!-- Campo de Correo -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Correo electrónico*</mat-label>
           <input matInput type="email" formControlName="email" />
           <mat-icon matSuffix>alternate_email</mat-icon>
           <mat-error *ngIf="form.get('email')?.hasError('required')">
@@ -33,8 +27,9 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Contraseña</mat-label>
+        <!-- Campo de Contraseña -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Contraseña*</mat-label>
           <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" />
           <button mat-icon-button matSuffix type="button" (click)="hide = !hide">
             <mat-icon>{{ hide ? 'visibility' : 'visibility_off' }}</mat-icon>
@@ -44,8 +39,10 @@
           </mat-error>
         </mat-form-field>
 
-        <button mat-raised-button color="primary" type="submit"
-                [disabled]="form.invalid || isLoading">
+        <!-- Botón de Entrar -->
+        <button mat-flat-button color="primary" type="submit"
+                [disabled]="form.invalid || isLoading"
+                class="login-button">
           <ng-container *ngIf="!isLoading; else loading">Entrar</ng-container>
           <ng-template #loading>
             <mat-progress-spinner diameter="20" strokeWidth="3" mode="indeterminate"></mat-progress-spinner>
@@ -53,12 +50,16 @@
           </ng-template>
         </button>
 
+        <!-- Links: Olvidaste contraseña / Registrarse -->
         <div class="links">
           <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
           <span>•</span>
           <a routerLink="/register">Registrarse</a>
         </div>
+
       </form>
     </mat-card-content>
+
   </mat-card>
+
 </div>
