@@ -1,64 +1,150 @@
-<div class="background"></div>
+<!-- Fondo con partículas -->
+<div class="background">
+  <div class="particles" aria-hidden="true"></div>
+</div>
 
-<div class="container" [@fadeIn]>
-  <!-- Título principal animado fuera de la tarjeta -->
-  <div class="app-title animated-text">
-    <span class="letter">P</span><span class="letter">l</span><span class="letter">a</span><span class="letter">n</span><span class="letter">t</span>
-    <span class="letter" style="margin-left: 10px;">D</span><span class="letter">i</span><span class="letter">s</span><span class="letter">e</span><span class="letter">a</span><span class="letter">s</span><span class="letter">e</span>
-    <span class="letter" style="margin-left: 10px;">D</span><span class="letter">e</span><span class="letter">t</span><span class="letter">e</span><span class="letter">c</span><span class="letter">t</span><span class="letter">o</span><span class="letter">r</span>
+<!-- Logo con animación lunar -->
+<div class="app-header" [@logoAnimation]="logoState">
+  <div class="logo-container">
+    <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 10 C30 10, 10 30, 10 50 C10 70, 30 90, 50 90 C70 90, 90 70, 90 50 C90 30, 70 10, 50 10 M50 5 C50 5, 50 5, 50 5" 
+            fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="50" cy="50" r="35" fill="currentColor" opacity="0.2"/>
+      <path d="M50 15 C50 15, 50 15, 50 15" fill="currentColor"/>
+    </svg>
   </div>
+  <h1 class="app-title">Plant Disease Detector</h1>
+  <span class="version-badge">v2.0</span>
+  <p class="app-subtitle">Asistencia Agrícola Inteligente</p>
+</div>
 
+<!-- Contenedor principal con animaciones -->
+<main class="login-container" [@formAnimations]>
   <mat-card class="login-card">
-    <div class="top-actions">
-      <button mat-icon-button (click)="toggleDark()" aria-label="Cambiar tema">
-        <mat-icon>{{ dark ? 'dark_mode' : 'light_mode' }}</mat-icon>
-      </button>
-    </div>
+    <!-- Toggle tema -->
+    <button 
+      class="theme-toggle" 
+      mat-icon-button 
+      (click)="toggleDark()" 
+      aria-label="Cambiar tema"
+      [class.dark]="theme.isDark()">
+      <mat-icon class="theme-icon">
+        <span class="sun-icon">☀️</span>
+        <span class="moon-icon">🌙</span>
+      </mat-icon>
+    </button>
 
-    <mat-card-header>
-      <mat-card-title>Iniciar Sesión</mat-card-title>
+    <!-- Header -->
+    <mat-card-header class="card-header">
+      <mat-card-title class="card-title">Iniciar Sesión</mat-card-title>
+      <mat-card-subtitle class="card-subtitle">
+        Accede a tu asistente lunar
+      </mat-card-subtitle>
     </mat-card-header>
 
-    <mat-card-content>
+    <!-- Formulario -->
+    <mat-card-content class="card-content">
       <form [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field appearance="outline">
-          <mat-label>Correo electrónico</mat-label>
-          <input matInput type="email" formControlName="email" />
-          <mat-icon matSuffix>alternate_email</mat-icon>
-          <mat-error *ngIf="form.get('email')?.hasError('required')">
-            El correo es requerido
+        <!-- Email -->
+        <mat-form-field 
+          class="anim-item custom-field" 
+          appearance="fill"
+          [@shake]="form.errors?.['invalid'] ? 'error' : 'void'"> <!-- ✅ CORREGIDO -->
+          <mat-label class="field-label">Correo electrónico</mat-label>
+          <input 
+            matInput 
+            type="email" 
+            formControlName="email"
+            class="field-input"
+            placeholder="tu@email.com">
+          <mat-icon matPrefix class="field-icon">alternate_email</mat-icon>
+          <mat-error *ngIf="email?.errors?.['required']"> <!-- ✅ CORREGIDO -->
+            <mat-icon>error</mat-icon>
+            El correo es obligatorio
           </mat-error>
-          <mat-error *ngIf="form.get('email')?.hasError('email')">
+          <mat-error *ngIf="email?.errors?.['email']"> <!-- ✅ CORREGIDO -->
+            <mat-icon>warning</mat-icon>
             Formato inválido
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Contraseña</mat-label>
-          <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" />
-          <button mat-icon-button matSuffix type="button" (click)="hide = !hide">
+        <!-- Password -->
+        <mat-form-field 
+          class="anim-item custom-field" 
+          appearance="fill"
+          [@shake]="form.errors?.['invalid'] ? 'error' : 'void'"> <!-- ✅ CORREGIDO -->
+          <mat-label class="field-label">Contraseña</mat-label>
+          <input 
+            matInput 
+            [type]="hide ? 'password' : 'text'" 
+            formControlName="password"
+            class="field-input"
+            placeholder="••••••••">
+          <mat-icon matPrefix class="field-icon">lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button" 
+            (click)="hide = !hide"
+            class="toggle-password">
             <mat-icon>{{ hide ? 'visibility' : 'visibility_off' }}</mat-icon>
           </button>
-          <mat-error *ngIf="form.get('password')?.hasError('required')">
-            Contraseña requerida
+          <mat-error *ngIf="password?.errors?.['required']"> <!-- ✅ CORREGIDO -->
+            <mat-icon>error</mat-icon>
+            La contraseña es obligatoria
+          </mat-error>
+          <mat-error *ngIf="password?.errors?.['minlength']"> <!-- ✅ CORREGIDO -->
+            <mat-icon>warning</mat-icon>
+            Mínimo 6 caracteres
           </mat-error>
         </mat-form-field>
 
-        <button mat-raised-button color="primary" type="submit"
-                [disabled]="form.invalid || isLoading">
-          <ng-container *ngIf="!isLoading; else loading">Entrar</ng-container>
-          <ng-template #loading>
-            <mat-progress-spinner diameter="20" strokeWidth="3" mode="indeterminate"></mat-progress-spinner>
-            Cargando...
-          </ng-template>
+        <!-- Botón de Login -->
+        <button 
+          class="anim-item login-btn"
+          mat-raised-button 
+          color="primary" 
+          type="submit"
+          [disabled]="form.invalid || isLoading">
+          <span class="btn-content">
+            <ng-container *ngIf="!isLoading; else loading">
+              <mat-icon class="btn-icon">login</mat-icon>
+              <span>Entrar al Sistema</span>
+            </ng-container>
+            <ng-template #loading>
+              <div class="btn-loader">
+                <mat-progress-spinner 
+                  diameter="24" 
+                  strokeWidth="3" 
+                  mode="indeterminate">
+                </mat-progress-spinner>
+                <span>Iniciando sesión...</span>
+              </div>
+            </ng-template>
+          </span>
         </button>
 
-        <div class="links">
-          <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
-          <span>•</span>
-          <a routerLink="/register">Registrarse</a>
+        <!-- Links -->
+        <div class="card-links anim-item">
+          <a routerLink="/forgot-password" class="link-item">
+            <mat-icon class="link-icon">help</mat-icon>
+            ¿Olvidaste tu contraseña?
+          </a>
+          <span class="link-separator">•</span>
+          <a routerLink="/register" class="link-item">
+            <mat-icon class="link-icon">person_add</mat-icon>
+            Registrarse
+          </a>
         </div>
       </form>
     </mat-card-content>
   </mat-card>
-</div>
+</main>
+
+<!-- Footer lunar -->
+<footer class="lunar-footer">
+  <div class="moon-phase">
+    <span class="phase-icon">🌕</span>
+    <span class="phase-text">Luna Llena - Ideal para cosechar</span>
+  </div>
+</footer>

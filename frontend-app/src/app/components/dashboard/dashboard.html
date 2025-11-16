@@ -1,30 +1,69 @@
-<div class="lunar-widget-container">
-  <app-lunar-calendar></app-lunar-calendar>
+<!-- Fondo animado -->
+<div class="background">
+  <div class="particles" aria-hidden="true"></div>
 </div>
 
-<h2 class="dashboard-title">Mis Cultivos Principales</h2>
+<!-- Header con información del usuario -->
+<header class="dashboard-header" @fadeInUp>
+  <div class="header-content">
+    <mat-icon class="user-avatar">agriculture</mat-icon>
+    <div class="user-info">
+      <h1 class="greeting">¡Hola, {{ userName }}! 🌿</h1>
+      <p class="date">{{ currentDate | date:'longDate' }}</p>
+    </div>
+  </div>
 
-<mat-grid-list cols="3" rowHeight="450px" gutterSize="20px" [@listAnimation]="cultivos.length">
+  <app-lunar-calendar class="lunar-widget"></app-lunar-calendar>
+</header>
+
+<!-- Título de sección -->
+<section class="section-title" @fadeInUp>
+  <h2 class="title-text">Mis Cultivos Principales</h2>
+  <p class="subtitle-text">Selecciona un cultivo para comenzar el diagnóstico</p>
+</section>
+
+<!-- Grid de tarjetas de cultivos -->
+<main class="cultivos-grid" [@staggerCards]="cultivos.length">
   
-  <mat-grid-tile *ngFor="let cultivo of cultivos">
-    <mat-card class="cultivo-card animated-card">
-      <img mat-card-image [src]="cultivo.imagen" [alt]="cultivo.nombre">
+  <mat-card 
+    *ngFor="let cultivo of cultivos" 
+    class="cultivo-card glass-card"
+    [style.--card-accent]="cultivo.color">
+    
+    <!-- SVG de cultivo con overlay -->
+    <div class="card-image-container">
+      <img 
+        [src]="cultivo.imagen" 
+        [alt]="cultivo.nombre"
+        class="cultivo-svg"
+        loading="lazy">
       
-      <mat-card-header>
-        <mat-card-title>{{ cultivo.nombre }}</mat-card-title>
-      </mat-card-header>
+      <!-- Overlay con gradiente -->
+      <div class="image-overlay"></div>
       
-      <mat-card-content>
-        <p>{{ cultivo.descripcion }}</p>
-      </mat-card-content>
-      
-      <mat-card-actions>
-        <button mat-flat-button color="primary">
-          <mat-icon>explore</mat-icon>
-          Explorar
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </mat-grid-tile>
+      <!-- Icono central -->
+      <mat-icon class="center-icon">{{ cultivo.icon }}</mat-icon>
+    </div>
+    
+    <!-- Contenido de la tarjeta -->
+    <mat-card-header>
+      <mat-card-title class="card-title">{{ cultivo.nombre }}</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <p class="card-description">{{ cultivo.descripcion }}</p>
+    </mat-card-content>
+    
+    <mat-card-actions class="card-actions">
+      <button 
+        mat-raised-button 
+        class="explore-btn"
+        [routerLink]="['/deteccion', slugify(cultivo.nombre)]">
+        <mat-icon>biotech</mat-icon>
+        <span>Iniciar Detección</span>
+      </button>
 
-</mat-grid-list>
+    </mat-card-actions>
+  </mat-card>
+
+</main>

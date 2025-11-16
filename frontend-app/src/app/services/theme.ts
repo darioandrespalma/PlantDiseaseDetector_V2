@@ -1,42 +1,54 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Renderer2, RendererFactory2, Inject, PLATFORM_ID } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-
-const KEY = 'pdd-theme'; // 'dark' | 'light'
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private _dark$ = new BehaviorSubject<boolean>(false);
-  dark$ = this._dark$.asObservable();
+  private renderer: Renderer2;
+  private darkSubject = new BehaviorSubject<boolean>(false);
+  dark$ = this.darkSubject.asObservable();
 
-  constructor() {
-    const initial = this.readPref();
-    this._dark$.next(initial);
+  constructor(
+    rendererFactory: RendererFactory2,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.renderer = rendererFactory.createRenderer(null, null);
+    this.initTheme();
   }
 
-  private isBrowser(): boolean {
-    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
-  }
-
-  private readPref(): boolean {
-    if (!this.isBrowser()) return false; // evita error en SSR
-
-    const saved = localStorage.getItem(KEY);
-    if (saved === 'dark' || saved === 'light') return saved === 'dark';
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
-  }
-
-  isDark(): boolean {
-    return this._dark$.value;
-  }
-
-  setDark(dark: boolean) {
-    this._dark$.next(dark);
-    if (this.isBrowser()) {
-      localStorage.setItem(KEY, dark ? 'dark' : 'light');
+  private initTheme() {
+    // ✅ SOLO acceder a localStorage en el navegador
+    if (isPlatformBrowser(this.platformId)) {
+      const saved = localStorage.getItem('darkTheme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? JSON.parse(saved) : prefersDark;
+      this.setTheme(isDark);
     }
   }
 
   toggle() {
-    this.setDark(!this._dark$.value);
+    const newValue = !this.darkSubject.value;
+    this.setTheme(newValue);
+    
+    // ✅ SOLO guardar en localStorage en el navegador
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('darkTheme', JSON.stringify(newValue));
+    }
+  }
+
+  private setTheme(isDark: boolean) {
+    const body = document.body;
+    
+    if (isDark) {
+      this.renderer.addClass(body, 'dark-theme');
+    } else {
+      this.renderer.removeClass(body, 'dark-theme');
+    }
+    
+    this.darkSubject.next(isDark);
+  }
+
+  isDark() {
+    return this.darkSubject.value;
   }
 }

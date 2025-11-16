@@ -1,63 +1,114 @@
-<mat-sidenav-container class="sidenav-container">
+<mat-sidenav-container class="sidenav-container" autosize>
 
-  <mat-sidenav #snav 
-      [mode]="mobileQuery.matches ? 'over' : 'side'"
-      [fixedInViewport]="mobileQuery.matches"
-      fixedTopGap="0"
-      [opened]="!mobileQuery.matches && !isSidenavCollapsed"
-      [class.sidenav-collapsed]="isSidenavCollapsed">
-
+  <!-- Sidenav izquierdo -->
+  <mat-sidenav 
+    #snav 
+    class="main-sidenav"
+    [mode]="mobileQuery.matches ? 'over' : 'side'"
+    [fixedInViewport]="mobileQuery.matches"
+    fixedTopGap="0"
+    [opened]="!mobileQuery.matches"
+    [class.sidenav-collapsed]="isSidenavCollapsed"
+    @sidenavAnimation>
+    
+    <!-- Header con gradiente -->
     <div class="sidenav-header">
-      <img src="favicon.ico" alt="Logo" class="logo">
-      <span *ngIf="!isSidenavCollapsed" class="logo-text">PD-IA v2</span>
+      <mat-icon class="logo-icon">agriculture</mat-icon>
+      <div class="header-info" *ngIf="!isSidenavCollapsed">
+        <span class="logo-text">PD-IA v2</span>
+        <small class="logo-subtitle">Asistente Agrícola</small>
+      </div>
     </div>
 
-    <mat-nav-list>
-      <a mat-list-item 
-         *ngFor="let item of menuItems"
-         [routerLink]="item.route" 
-         routerLinkActive="active-item"
-         [matTooltip]="isSidenavCollapsed ? item.name : ''"
-         matTooltipPosition="right">
+
+    <!-- Menú principal -->
+    <mat-nav-list class="nav-list">
+      <a 
+        mat-list-item 
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route" 
+        routerLinkActive="active-item"
+        [class.active-item]="isActive(item.route)"
+        [matTooltip]="isSidenavCollapsed ? item.name : ''"
+        matTooltipPosition="right"
+        class="nav-item">
         
-        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-        <span *ngIf="!isSidenavCollapsed" class="nav-item-text">{{ item.name }}</span>
+        <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+        <span *ngIf="!isSidenavCollapsed" class="nav-text">{{ item.name }}</span>
+        
+        <!-- Indicador activo -->
+        <div class="active-indicator" *ngIf="isActive(item.route)"></div>
       </a>
     </mat-nav-list>
 
-    <div class="sidenav-footer">
-      <a mat-list-item routerLink="/cuenta" routerLinkActive="active-item" [matTooltip]="isSidenavCollapsed ? 'Mi Cuenta' : ''" matTooltipPosition="right">
-        <mat-icon matListItemIcon>account_circle</mat-icon>
-        <span *ngIf="!isSidenavCollapsed" class="nav-item-text">Mi Cuenta</span>
-      </a>
-      <a mat-list-item routerLink="/soporte" routerLinkActive="active-item" [matTooltip]="isSidenavCollapsed ? 'Soporte' : ''" matTooltipPosition="right">
-        <mat-icon matListItemIcon>help_outline</mat-icon>
-        <span *ngIf="!isSidenavCollapsed" class="nav-item-text">Soporte</span>
-      </a>
+    <!-- Footer del menú -->
+    <div class="sidenav-footer" *ngIf="!isSidenavCollapsed">
+      <div class="user-card">
+        <mat-icon class="user-icon">person</mat-icon>
+        <div class="user-details">
+          <strong class="user-name">{{ userName }}</strong>
+          <small class="user-role">Productor Agrícola</small>
+        </div>
+      </div>
+      
+      <div class="footer-actions">
+        <button 
+          mat-icon-button 
+          class="theme-toggle-btn"
+          (click)="theme.toggle()"
+          matTooltip="Cambiar tema">
+          <mat-icon>{{ theme.isDark() ? 'dark_mode' : 'light_mode' }}</mat-icon>
+        </button>
+        
+
+      </div>
     </div>
 
   </mat-sidenav>
 
-  <mat-sidenav-content>
+  <!-- Contenido principal -->
+  <mat-sidenav-content class="main-content">
     
-    <mat-toolbar color="primary" class="toolbar">
-      <button mat-icon-button (click)="isSidenavCollapsed = !isSidenavCollapsed" *ngIf="!mobileQuery.matches">
+    <!-- Toolbar superior -->
+    <mat-toolbar color="primary" class="main-toolbar">
+      <button 
+        mat-icon-button 
+        class="menu-toggle"
+        (click)="toggleSidenav()"
+        matTooltip="Menú">
         <mat-icon>menu</mat-icon>
       </button>
-      <button mat-icon-button (click)="snav.toggle()" *ngIf="mobileQuery.matches">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>Detector de Enfermedades</span>
-
+      
+      <span class="toolbar-title">Detector de Enfermedades</span>
+      
       <span class="toolbar-spacer"></span>
       
-      <span>Hola, {{ userName }}</span>
-      <button mat-icon-button [matTooltip]="'Cerrar Sesión'" (click)="logout()">
+      <!-- Indicador de ruta actual -->
+      <div class="route-indicator" *ngIf="!mobileQuery.matches">
+        <mat-icon class="indicator-icon">location_on</mat-icon>
+        <span class="indicator-text">{{ currentRoute | titlecase }}</span>
+      </div>
+      
+      <!-- Acciones rápidas -->
+      <button 
+        mat-icon-button 
+        class="theme-toggle"
+        (click)="theme.toggle()"
+        matTooltip="Cambiar tema">
+        <mat-icon>{{ theme.isDark() ? 'dark_mode' : 'light_mode' }}</mat-icon>
+      </button>
+      
+      <button 
+        mat-icon-button 
+        class="logout-btn"
+        (click)="logout()"
+        matTooltip="Cerrar Sesión">
         <mat-icon>logout</mat-icon>
       </button>
     </mat-toolbar>
 
-    <div class="main-content">
+    <!-- Contenido de la página -->
+    <div class="content-wrapper">
       <router-outlet></router-outlet>
     </div>
 

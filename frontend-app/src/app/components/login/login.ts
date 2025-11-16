@@ -1,18 +1,17 @@
-// src/app/components/login/login.ts
-import { Component, HostBinding, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { finalize } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 // Services
 import { AuthService } from '../../services/auth';
 import { WebsocketService } from '../../services/websocket';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../services/toast';
 import { ThemeService } from '../../services/theme';
 
-// Angular Material (sub-paquetes)
+// Angular Material
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,8 +20,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Animaciones
-import { trigger, transition, style, animate } from '@angular/animations';
-import { FixedSizeVirtualScrollStrategy } from '@angular/cdk/scrolling';
+import { formAnimations, logoAnimation, shakeAnimation } from '../../animations/auth-animations';
 
 @Component({
   selector: 'app-login',
@@ -34,64 +32,88 @@ import { FixedSizeVirtualScrollStrategy } from '@angular/cdk/scrolling';
   ],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
-  animations: [
-    trigger('fadeIn', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(10px)' }),
-        animate('600ms cubic-bezier(.4,0,.2,1)', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
-    ])
-  ]
+  animations: [formAnimations, logoAnimation, shakeAnimation]
 })
-export class LoginComponent implements OnDestroy {
-  @HostBinding('class.dark') dark = false;
-
+export class LoginComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   hide = true;
   isLoading = false;
+  logoState = 'normal';
+  dark = false; // ✅ AÑADIDO: Propiedad para el template
 
-  private themeSub?: Subscription;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
     private ws: WebsocketService,
     private router: Router,
-    private toast: ToastrService,        // 👈 COMA AQUÍ
-    private theme: ThemeService          // 👈 INYECTADO
-  ) {
+    private toast: ToastService,
+    public theme: ThemeService // ✅ CAMBIADO A PUBLIC
+  ) {}
+
+  ngOnInit() {
+    this.initForm();
+    this.animateLogo();
+    
+    // ✅ Sincronizar propiedad dark con el servicio
+    this.dark = this.theme.isDark();
+    this.theme.dark$.pipe(takeUntil(this.destroy$)).subscribe(v => this.dark = v);
+  }
+
+  private initForm() {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
-
-    // Sincroniza con ThemeService (persistente entre pantallas)
-    this.dark = this.theme.isDark();
-    this.themeSub = this.theme.dark$.subscribe(v => (this.dark = v));
   }
 
-  toggleDark() { this.theme.toggle(); }  // 👈 usa el servicio, no solo variable local
+  private animateLogo() {
+    setInterval(() => {
+      this.logoState = 'pulse';
+      setTimeout(() => this.logoState = 'normal', 300);
+    }, 5000);
+  }
+
+  get email() { return this.form.get('email'); }
+  get password() { return this.form.get('password'); }
+
+  toggleDark() {
+    this.theme.toggle();
+  }
 
   submit() {
     if (this.form.invalid) {
-      this.toast.warning('Completa los campos correctamente');
+      this.toast.warning('🌱 Completa los campos correctamente', 'Aviso');
       this.form.markAllAsTouched();
+      // Trigger shake animation
+      this.form.setErrors({ 'invalid': true });
+      setTimeout(() => this.form.setErrors(null), 500);
       return;
     }
+
     this.isLoading = true;
     this.auth.login(this.form.value)
-      .pipe(finalize(() => (this.isLoading = false)))
+      .pipe(
+        finalize(() => (this.isLoading = false)),
+        takeUntil(this.destroy$)
+      )
       .subscribe({
         next: () => {
-          this.toast.success('Bienvenido 🌿');
+          this.toast.success('🌿 Bienvenido a tu asistente agrícola', 'Éxito');
           this.ws.connect();
           this.router.navigate(['/dashboard']);
         },
-        error: err => this.toast.error(err?.error?.message || 'Error al iniciar sesión')
+        error: err => {
+          const message = err?.error?.message || 'Error al iniciar sesión';
+          this.toast.error(message, 'Error');
+          this.password?.reset();
+        }
       });
   }
 
   ngOnDestroy() {
-    this.themeSub?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

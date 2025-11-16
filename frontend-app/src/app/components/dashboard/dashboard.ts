@@ -1,67 +1,101 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { trigger, transition, style, animate, query, stagger } from '@angular/animations'; // Importa animaciones
+import { RouterLink } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
-// --- Importaciones de Angular Material ---
-import { MatGridListModule } from '@angular/material/grid-list';
+// Angular Material
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatGridListModule } from '@angular/material/grid-list';
 
-// Importa el nuevo componente Lunar
+// Componentes propios
 import { LunarCalendarComponent } from '../lunar-calendar/lunar-calendar';
+import { ThemeService } from '../../services/theme';
+
+// Animaciones
+import { trigger, stagger, animate, style, query, transition } from '@angular/animations';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     MatGridListModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    LunarCalendarComponent // Añade el componente lunar
+    LunarCalendarComponent
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
-  // --- Define la animación de "stagger" (escalonado) ---
   animations: [
-    trigger('listAnimation', [
-      transition('* => *', [ // Cada vez que la lista cambia
+    trigger('staggerCards', [
+      transition('* => *', [
         query(':enter', [
-          style({ opacity: 0, transform: 'translateY(20px)' }),
-          stagger('100ms', [
-            animate('0.5s cubic-bezier(0.25, 0.8, 0.25, 1)', 
+          style({ opacity: 0, transform: 'translateY(30px)' }),
+          stagger(150, [
+            animate('600ms cubic-bezier(0.35, 0, 0.25, 1)', 
               style({ opacity: 1, transform: 'none' }))
           ])
         ], { optional: true })
       ])
+    ]),
+    trigger('fadeInUp', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(20px)' }),
+        animate('500ms cubic-bezier(0.4, 0, 0.2, 1)', 
+          style({ opacity: 1, transform: 'none' }))
+      ])
     ])
   ]
 })
-export class DashboardComponent {
-  
-  // Lista de cultivos
+export class DashboardComponent implements OnInit, OnDestroy {
   cultivos = [
     {
-      nombre: 'Detección de banano',
-      descripcion: 'Detecta enfermedades como el Sigatoka negra y el moko.',
-      imagen: 'assets/images/banano.jpg', // Necesitarás crear esta carpeta y añadir imágenes
-      icono: 'assets/icons/banana-icon.png'
+      nombre: 'Detección de Banano',
+      descripcion: 'Detecta enfermedades como Sigatoka negra, moko y más con IA.',
+      imagen: 'banana.svg',
+      color: '--color-sowing',
+      icon: 'agriculture'
     },
     {
-      nombre: 'Detección de arroz',
-      descripcion: 'Identifica problemas como el tizón del arroz o la mancha marrón.',
-      imagen: 'assets/images/arroz.jpg',
-      icono: 'assets/icons/rice-icon.png'
+      nombre: 'Detección de Arroz',
+      descripcion: 'Identifica tizón, mancha marrón y otros problemas foliares.',
+      imagen: 'arroz.svg',
+      color: '--color-harvest',
+      icon: 'eco'
     },
     {
-      nombre: 'Detección de café',
-      descripcion: 'Diagnóstico de la roya del café y la antracnosis.',
-      imagen: 'assets/images/cafe.jpg',
-      icono: 'assets/icons/coffee-icon.png'
+      nombre: 'Detección de Café',
+      descripcion: 'Diagnóstico preciso de roya, antracnosis y minadores.',
+      imagen: 'Cafe.svg',
+      color: '--color-rest',
+      icon: 'grain'
     }
   ];
 
-  constructor() { }
+  userName = 'Agricultor';
+  currentDate = new Date();
+  private destroy$ = new Subject<void>();
+
+  constructor(public theme: ThemeService) {}
+
+  slugify(nombre: string): string {
+    return nombre.toLowerCase().replace(/\s+/g, '-');
+  }
+
+  ngOnInit() {
+    // Cargar nombre del usuario desde localStorage
+    if (typeof window !== 'undefined') {
+      this.userName = localStorage.getItem('userName') || 'Agricultor';
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }
