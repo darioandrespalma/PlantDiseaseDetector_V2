@@ -57,7 +57,11 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    // 8. Esta función ahora funcionará de forma segura en el servidor
-    return this.getToken() !== null;
+    try {
+      return typeof localStorage !== 'undefined' && localStorage.getItem('token') !== null;
+    } catch {
+      return false;
+    }
   }
+
 }
