@@ -2,18 +2,22 @@
 require('dotenv').config();
 
 const express = require('express');
-// const dotenv = require('dotenv'); // ya no lo necesitas realmente
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 
+// ==============================
+// ORIGEN DEL FRONTEND
+// ==============================
+// Pon en tu .env: FRONTEND_URL=http://localhost:4200
+const FRONTEND_ORIGIN = process.env.FRONTEND_URL || 'http://localhost:4200';
+
 // Importar rutas DESPUÉS de dotenv.config()
 const authRoutes = require('./routes/auth');
 const predictRoutes = require('./routes/predict');
-const climateRoutes = require("./routes/climate");
-
+const climateRoutes = require('./routes/climate');
 
 // Connect to database
 connectDB();
@@ -21,8 +25,16 @@ connectDB();
 // Initialize express
 const app = express();
 
+// ==============================
 // Middlewares
-app.use(cors());
+// ==============================
+
+// CORS para las peticiones HTTP normales
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(morgan('dev')); // Logging middleware
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -30,7 +42,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/predict', predictRoutes);
-app.use("/api/climate", climateRoutes);
+app.use('/api/climate', climateRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -50,13 +62,17 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`CORS allowed origin: ${FRONTEND_ORIGIN}`);
 });
 
+// ==============================
 // Socket.IO setup
+// ==============================
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Permitir conexiones del frontend
-    methods: ['GET', 'POST']
+    origin: FRONTEND_ORIGIN,   // 👈 AQUÍ EL CAMBIO IMPORTANTE
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
