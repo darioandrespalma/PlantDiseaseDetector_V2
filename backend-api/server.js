@@ -1,15 +1,19 @@
+// 1. Cargar variables de entorno ANTES de todo
+require('dotenv').config();
+
 const express = require('express');
-const dotenv = require('dotenv');
+// const dotenv = require('dotenv'); // ya no lo necesitas realmente
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
+
+// Importar rutas DESPUÉS de dotenv.config()
 const authRoutes = require('./routes/auth');
 const predictRoutes = require('./routes/predict');
+const climateRoutes = require("./routes/climate");
 
-// Load environment variables
-dotenv.config();
 
 // Connect to database
 connectDB();
@@ -26,6 +30,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/predict', predictRoutes);
+app.use("/api/climate", climateRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
