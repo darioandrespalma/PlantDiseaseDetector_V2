@@ -1,0 +1,125 @@
+<div class="background" aria-hidden="true">
+  <div class="particles"></div>
+</div>
+
+<div class="container" @fadeInOut>
+  <!-- Header -->
+  <header class="detection-header">
+    <button mat-icon-button class="back-btn" (click)="router.navigate(['/dashboard'])">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-info">
+      <h1 class="title">Detección de Banano</h1>
+      <p class="subtitle">Sube una imagen para diagnosticar enfermedades</p>
+    </div>
+    <div class="crop-icon">
+      <img src="banana.svg" alt="Banano" class="icon-svg">
+    </div>
+  </header>
+
+  <!-- Upload Area -->
+  <div class="upload-section" *ngIf="!loading">
+    <div 
+      class="upload-area glass-card"
+      [class.dragging]="isDragging"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      @fadeInOut>
+
+      <!-- Estado vacío -->
+      <ng-container *ngIf="!previewUrl">
+        <mat-icon class="upload-icon">cloud_upload</mat-icon>
+        <h2 class="upload-title">Arrastra tu imagen aquí</h2>
+        <p class="upload-subtitle">O haz clic para seleccionar un archivo</p>
+        
+        <!-- ✅ INPUT CORREGIDO -->
+        <input 
+          type="file" 
+          #fileInput
+          id="fileInput" 
+          hidden 
+          accept="image/*"
+          (change)="onFileSelected($event)">
+        
+        <button 
+          mat-raised-button 
+          class="select-btn"
+          (click)="fileInput.click()">
+          <mat-icon>folder_open</mat-icon>
+          Seleccionar Imagen
+        </button>
+      </ng-container>
+
+      <!-- Estado con imagen -->
+      <ng-container *ngIf="previewUrl">
+        <div class="preview-container">
+          <img [src]="previewUrl" alt="Preview" class="preview-image">
+          <button mat-icon-button class="remove-btn" (click)="removeImage()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        
+        <div class="file-info">
+          <mat-icon class="file-icon">image</mat-icon>
+          <span class="file-name">{{ selectedFile?.name }}</span>
+          <span class="file-size">
+            {{ (selectedFile?.size || 0) / 1024 / 1024 | number:'1.1-1' }} MB
+          </span>
+        </div>
+
+        <button 
+          mat-raised-button 
+          class="detect-btn"
+          (click)="uploadImage()"
+          [disabled]="!selectedFile">
+          <mat-icon>biotech</mat-icon>
+          Iniciar Detección
+        </button>
+      </ng-container>
+
+      <!-- Mensaje de error -->
+      <div class="error-message" *ngIf="errorMessage">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="tips-card glass-card" @fadeInOut>
+      <h3 class="tips-title">
+        <mat-icon>tips_and_updates</mat-icon>
+        Consejos para una mejor detección
+      </h3>
+      <ul class="tips-list">
+        <li>Usa imágenes claras y bien iluminadas</li>
+        <li>Enfoca la hoja o fruto afectado</li>
+        <li>Evita fondos muy complejos</li>
+        <li>Tamaño máximo: 5MB</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-section" *ngIf="loading" @fadeInOut>
+    <div class="loading-card glass-card">
+      <mat-progress-spinner 
+        mode="indeterminate" 
+        diameter="80"
+        strokeWidth="6"
+        color="accent">
+      </mat-progress-spinner>
+      
+      <h2 class="loading-title">Procesando tu imagen</h2>
+      <p class="loading-subtitle">La IA está analizando los patrones de la enfermedad...</p>
+      
+      <div class="loading-animation">
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+
+      <p class="loading-tip">Esto suele tomar 5-10 segundos</p>
+    </div>
+  </div>
+</div>

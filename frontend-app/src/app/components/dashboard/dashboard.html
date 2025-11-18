@@ -58,7 +58,7 @@
       <button 
         mat-raised-button 
         class="explore-btn"
-        [routerLink]="['/deteccion', slugify(cultivo.nombre)]">
+        [routerLink]="['/deteccion', getCropKey(cultivo.nombre)]">
         <mat-icon>biotech</mat-icon>
         <span>Iniciar Detección</span>
       </button>

@@ -2,54 +2,54 @@
 const Prediction = require('../models/Prediction');
 const axios = require('axios');
 const FormData = require('form-data');
-const fs = require('fs'); // File System
+const fs = require('fs');
 
-// --- Función principal (CORREGIDA) ---
 exports.predictDisease = async (req, res) => {
-  // 1. Verificar si el archivo fue subido por el middleware
   if (!req.file) {
     return res.status(400).json({ message: 'No se subió ningún archivo de imagen.' });
   }
 
-  const imagePath = req.file.path; // Ruta al archivo temporal
+  // --- NUEVO: Obtener el cultivo enviado desde el frontend ---
+  const { crop } = req.body;
+  if (!crop || !['banana', 'rice', 'coffee'].includes(crop)) {
+    return res.status(400).json({ message: 'Crop es requerido y debe ser "banana", "rice" o "coffee".' });
+  }
+
+  const imagePath = req.file.path;
 
   try {
-    // 2. Preparar el archivo para enviarlo a la API de Python
     const formData = new FormData();
     formData.append('file', fs.createReadStream(imagePath), req.file.filename);
+    formData.append('crop', crop); // <--- PASAR EL CULTIVO AL SERVICIO PYTHON
 
-    // 3. Llamar a la API de Python (que está en el puerto 5000)
     const aiServiceUrl = 'http://localhost:5000/predict';
     const aiResponse = await axios.post(aiServiceUrl, formData, {
       headers: formData.getHeaders()
     });
 
-    // 4. Guardar el resultado en tu base de datos MongoDB
+    // --- Guardar en base de datos ---
     const prediction = await Prediction.create({
-      user: req.user._id, // ID del usuario (de authMiddleware)
+      user: req.user._id,
       imagePath: req.file.filename,
+      crop: crop, // <--- GUARDAR EL CULTIVO EN LA BASE DE DATOS
       result: {
-        disease: aiResponse.data.disease,
+        disease: aiResponse.data.prediction, // Cambié de `disease` a `prediction` como en tu servicio Python
         confidence: aiResponse.data.confidence,
         recommendations: aiResponse.data.recommendations
       }
     });
 
-    // 5. Enviar notificación por WebSocket al frontend
-    const io = req.app.get('io'); // Obtener 'io' de server.js
+    // --- Notificar por WebSocket ---
+    const io = req.app.get('io');
     io.to(`user_${req.user._id}`).emit('prediction_result', prediction);
 
-    // 6. Enviar la respuesta HTTP 201 (Creado)
     res.status(201).json(prediction);
 
   } catch (error) {
-    // 7. Manejo de errores
     console.error('Error en predictDisease:', error.message);
     res.status(500).json({ message: 'Error del servidor al procesar la predicción' });
-  
+
   } finally {
-    // 8. (SOLUCIÓN) Borrar el archivo temporal SIEMPRE
-    // Este bloque se ejecuta tanto si 'try' tiene éxito como si 'catch' falla.
     try {
       fs.unlinkSync(imagePath);
     } catch (err) {

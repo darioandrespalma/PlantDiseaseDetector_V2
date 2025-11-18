@@ -1,0 +1,115 @@
+<div class="background" aria-hidden="true">
+  <div class="particles"></div>
+</div>
+
+<div class="container" *ngIf="!loading && prediction" @fadeInUp>
+  <!-- Header -->
+  <header class="result-header">
+    <button mat-icon-button class="back-btn" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="title">Resultado del Diagnóstico</h1>
+    <div class="header-actions">
+      <button mat-icon-button (click)="goToHistory()">
+        <mat-icon>history</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- Result Card -->
+  <mat-card class="result-card glass-card">
+    <div class="result-content">
+      <!-- Imagen -->
+      <div class="image-section">
+        <img 
+          [src]="'http://localhost:3000/uploads/' + prediction.imagePath" 
+          [alt]="'Imagen de ' + prediction.crop"
+          class="result-image">
+      </div>
+
+      <!-- Info -->
+      <div class="info-section">
+        <div class="disease-header">
+          <h2 class="disease-name">{{ prediction.result.disease }}</h2>
+          <mat-chip class="crop-chip">
+            <mat-icon>agriculture</mat-icon>
+            {{ prediction.crop | titlecase }}
+          </mat-chip>
+        </div>
+
+        <div class="confidence-container">
+          <p class="confidence-label">Confianza del diagnóstico:</p>
+          <div class="confidence-bar">
+            <mat-progress-bar 
+              [value]="prediction.result.confidence"
+              [color]="prediction.result.confidence >= 80 ? 'accent' : 'warn'">
+            </mat-progress-bar>
+            <span class="confidence-value">
+              {{ prediction.result.confidence | number:'1.0-0' }}%
+            </span>
+          </div>
+        </div>
+
+        <div class="recommendations">
+          <h3 class="rec-title">
+            <mat-icon>recommend</mat-icon>
+            Recomendaciones
+          </h3>
+          <ul class="rec-list">
+            <li *ngFor="let rec of prediction.result.recommendations">
+              <mat-icon class="rec-icon">check_circle</mat-icon>
+              <span>{{ rec }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <mat-card-actions class="actions">
+          <button 
+            mat-raised-button 
+            class="new-detection-btn"
+            (click)="goBack()">
+            <mat-icon>add_a_photo</mat-icon>
+            Nueva Detección
+          </button>
+          <button 
+            mat-button 
+            class="save-btn"
+            (click)="goToHistory()">
+            <mat-icon>save</mat-icon>
+            Guardar en Historial
+          </button>
+        </mat-card-actions>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- Metadata -->
+  <div class="metadata-card glass-card">
+    <div class="meta-item">
+      <mat-icon class="meta-icon">calendar_today</mat-icon>
+      <span class="meta-label">Fecha:</span>
+      <span class="meta-value">
+        {{ prediction.createdAt | date:'medium' }}
+      </span>
+    </div>
+    <div class="meta-item">
+      <mat-icon class="meta-icon">label</mat-icon>
+      <span class="meta-label">ID:</span>
+      <span class="meta-value">{{ prediction._id }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="loading">
+  <mat-progress-spinner mode="indeterminate" diameter="60"></mat-progress-spinner>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="errorMessage">
+  <mat-icon class="error-icon">error_outline</mat-icon>
+  <h2 class="error-title">{{ errorMessage }}</h2>
+  <button mat-raised-button color="primary" (click)="goBack()">
+    Intentar de nuevo
+  </button>
+</div>

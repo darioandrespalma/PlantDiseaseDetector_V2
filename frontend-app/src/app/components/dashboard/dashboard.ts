@@ -87,6 +87,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return nombre.toLowerCase().replace(/\s+/g, '-');
   }
 
+  // ✅ MÉTODO DENTRO DE LA CLASE
+  getCropKey(nombre: string): string {
+    if (nombre.includes('Banano')) return 'banana';
+    if (nombre.includes('Arroz')) return 'rice';
+    if (nombre.includes('Café')) return 'coffee';
+    return 'banana'; // default
+  }
+
   ngOnInit() {
     // Cargar nombre del usuario desde localStorage
     if (typeof window !== 'undefined') {

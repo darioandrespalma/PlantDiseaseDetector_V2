@@ -1,0 +1,263 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+/* Header */
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.title {
+  flex: 1;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Result Card */
+.result-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.result-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.image-section {
+  background: var(--bg-card);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-image {
+  max-width: 100%;
+  max-height: 500px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-medium);
+}
+
+.info-section {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.disease-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.disease-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.crop-chip {
+  background: var(--color-primary-light) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.crop-chip mat-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.25rem;
+}
+
+/* Confidence */
+.confidence-container {
+  background: var(--bg-card);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+}
+
+.confidence-label {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.confidence-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.confidence-bar mat-progress-bar {
+  flex: 1;
+}
+
+.confidence-value {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Recommendations */
+.rec-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.rec-title mat-icon {
+  color: var(--color-primary);
+}
+
+.rec-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rec-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-medium);
+}
+
+.rec-list li:hover {
+  transform: translateX(4px);
+  background: var(--color-primary-light);
+  color: white;
+}
+
+.rec-icon {
+  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+.rec-list li:hover .rec-icon {
+  color: white;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.new-detection-btn {
+  flex: 1;
+  background: linear-gradient(135deg, var(--color-success), var(--color-success-dark));
+}
+
+.save-btn {
+  flex: 1;
+  border: 1px solid var(--color-primary);
+}
+
+/* Metadata */
+.metadata-card {
+  padding: 1rem 1.5rem;
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.meta-icon {
+  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--color-primary);
+}
+
+.meta-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.meta-value {
+  color: var(--text-secondary);
+}
+
+/* Loading & Error */
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+}
+
+.error-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  color: var(--color-error);
+}
+
+.error-title {
+  margin: 1rem 0;
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .result-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .image-section {
+    padding: 1rem;
+  }
+  
+  .info-section {
+    padding: 1.5rem;
+  }
+  
+  .disease-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+}
