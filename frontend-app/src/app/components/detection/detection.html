@@ -9,13 +9,16 @@
       <mat-icon>arrow_back</mat-icon>
     </button>
     <div class="header-info">
-      <h1 class="title">Detección de Banano</h1>
-      <p class="subtitle">Sube una imagen para diagnosticar enfermedades</p>
+      <h1 class="title">{{ currentCropConfig.title }}</h1>
+      <p class="subtitle">{{ currentCropConfig.subtitle }}</p>
     </div>
     <div class="crop-icon">
-      <img src="banana.svg" alt="Banano" class="icon-svg">
+      <img [src]="currentCropConfig.icon"
+          [alt]="currentCropConfig.alt"
+          class="icon-svg">
     </div>
   </header>
+
 
   <!-- Upload Area -->
   <div class="upload-section" *ngIf="!loading">

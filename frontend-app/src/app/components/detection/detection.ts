@@ -54,6 +54,33 @@ export class DetectionComponent implements OnInit, OnDestroy {
   loading = false;
   errorMessage: string | null = null;
 
+// ✅ Config por cultivo (claves alineadas con la URL y backend)
+cropConfigMap: Record<string, { title: string; subtitle: string; icon: string; alt: string }> = {
+  banana: {
+    title: 'Detección de Banano',
+    subtitle: 'Sube una imagen para diagnosticar enfermedades en banano.',
+    icon: 'banana.svg',
+    alt: 'Banano'
+  },
+  rice: {
+    title: 'Detección de Arroz',
+    subtitle: 'Sube una imagen de hojas de arroz para identificar tizón, mancha marrón y otros problemas foliares.',
+    icon: 'arroz.svg',
+    alt: 'Arroz'
+  },
+  coffee: {
+    title: 'Detección de Café',
+    subtitle: 'Sube una imagen de hojas de café para detectar roya, antracnosis y minadores.',
+    icon: 'Cafe.svg',
+    alt: 'Café'
+  }
+};
+
+get currentCropConfig() {
+  return this.cropConfigMap[this.crop] || this.cropConfigMap['banana'];
+}
+
+
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>; // ✅ Referencia
 
   private destroy$ = new Subject<void>();

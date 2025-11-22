@@ -91,9 +91,11 @@ export class ResultComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
+    const crop = this.prediction?.crop || 'banana';
     this.predictService.clearPrediction();
-    this.router.navigate(['/deteccion', 'banana']);
+    this.router.navigate(['/deteccion', crop]);
   }
+
 
   goToHistory() {
     this.router.navigate(['/dashboard']);
