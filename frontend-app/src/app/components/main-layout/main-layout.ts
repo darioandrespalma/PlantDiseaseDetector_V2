@@ -65,8 +65,9 @@ menuItems = [
   { name: 'Mi Finca', icon: 'agriculture', route: '/finca' },
   { name: 'Tareas', icon: 'task_alt', route: '/tareas' },
   { name: 'Recomendaciones', icon: 'lightbulb_outline', route: '/recomendaciones' },
+  { name: 'Mapa Finca', icon: 'map', route: '/mapa' },
   { name: 'Boletín', icon: 'campaign', route: '/boletin' },
-  { name: 'Biblioteca', icon: 'library_books', route: '/biblioteca' },
+  { name: 'Biblioteca', icon: 'library_books', route: '/biblioteca' }
 ];
 
 

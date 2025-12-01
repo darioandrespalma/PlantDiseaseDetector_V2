@@ -1,0 +1,188 @@
+<div class="biblioteca-container">
+  <h1 class="titulo-seccion">
+    <mat-icon>menu_book</mat-icon>
+    Biblioteca Agrícola
+  </h1>
+  <p class="subtitulo">
+    Aquí puedes aprender qué significan los diagnósticos de la IA y cómo cuidar mejor tus cultivos.
+  </p>
+
+  <mat-tab-group animationDuration="300ms">
+    <!-- TAB 1: Cultivos y enfermedades -->
+    <mat-tab label="Cultivos y enfermedades">
+      <div class="tab-content">
+        <mat-accordion class="accordion-fichas">
+          <mat-expansion-panel *ngFor="let ficha of fichas">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon class="icon-cultivo">spa</mat-icon>
+                {{ ficha.cultivo }} — {{ ficha.enfermedad }}
+              </mat-panel-title>
+              <mat-panel-description>
+                Ver detalles de síntomas y manejo
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <mat-card class="ficha-card">
+              <mat-card-header>
+                <mat-card-title>{{ ficha.enfermedad }} en {{ ficha.cultivo }}</mat-card-title>
+              </mat-card-header>
+
+              <mat-card-content>
+                <h3>Síntomas en campo</h3>
+                <p>{{ ficha.sintomas }}</p>
+
+                <h3>Condiciones que la favorecen</h3>
+                <p>{{ ficha.condiciones }}</p>
+
+                <mat-divider class="divider"></mat-divider>
+
+                <h3>Manejo recomendado</h3>
+                <ul class="lista-manejo">
+                  <li>
+                    <strong>Cultural:</strong>
+                    {{ ficha.manejoCultural }}
+                  </li>
+                  <li>
+                    <strong>Orgánico / biológico:</strong>
+                    {{ ficha.manejoOrganico }}
+                  </li>
+                  <li>
+                    <strong>Químico (bajo supervisión técnica):</strong>
+                    {{ ficha.manejoQuimico }}
+                  </li>
+                </ul>
+
+                <mat-divider class="divider"></mat-divider>
+
+                <h3>Relación con la IA</h3>
+                <p>{{ ficha.relacionIA }}</p>
+              </mat-card-content>
+            </mat-card>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </mat-tab>
+
+    <!-- TAB 2: Cómo funciona la IA -->
+    <mat-tab label="Cómo funciona la IA">
+      <div class="tab-content">
+        <mat-card class="intro-card">
+          <mat-card-header>
+            <mat-card-title>¿Cómo funciona el diagnóstico con IA en PD-IA v2?</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>
+              El sistema combina tu cámara, un servidor en Node.js y un microservicio de
+              inteligencia artificial en Python para analizar las hojas de tus cultivos.
+            </p>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="pasos-ia">
+          <mat-card class="paso-card" *ngFor="let paso of pasosIA">
+            <mat-card-header>
+              <mat-icon class="paso-icon">{{ paso.icon }}</mat-icon>
+              <mat-card-title>{{ paso.titulo }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{ paso.texto }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <mat-card class="nota-card">
+          <mat-card-content>
+            <mat-icon>info</mat-icon>
+            <span>
+              El objetivo de la IA no es reemplazar al técnico agrícola, sino apoyarlo con una
+              segunda opinión rápida basada en miles de imágenes de entrenamiento.
+            </span>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- TAB 3: Manual y buenas prácticas -->
+    <mat-tab label="Manual y buenas prácticas">
+      <div class="tab-content grid-educativa">
+        <!-- Cómo tomar una buena foto -->
+        <mat-card class="educ-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>photo_camera</mat-icon>
+            <mat-card-title>Cómo tomar una buena foto para el diagnóstico</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              <mat-list-item *ngFor="let tip of tipsFotos">
+                <mat-icon matListItemIcon>check_circle</mat-icon>
+                <div matListItemTitle>{{ tip }}</div>
+              </mat-list-item>
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- MIP -->
+        <mat-card class="educ-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>eco</mat-icon>
+            <mat-card-title>Buenas prácticas de Manejo Integrado de Plagas (MIP)</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              <mat-list-item *ngFor="let tip of tipsMIP">
+                <mat-icon matListItemIcon>agriculture</mat-icon>
+                <div matListItemTitle>{{ tip }}</div>
+              </mat-list-item>
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Glosario -->
+        <mat-card class="educ-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>library_books</mat-icon>
+            <mat-card-title>Glosario básico</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              <mat-list-item *ngFor="let item of glosario">
+                <mat-icon matListItemIcon>bookmark</mat-icon>
+                <div matListItemTitle>{{ item.termino }}</div>
+                <div matListItemLine>{{ item.definicion }}</div>
+              </mat-list-item>
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Mini manual de la app -->
+        <mat-card class="educ-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>smartphone</mat-icon>
+            <mat-card-title>Manual rápido de la aplicación</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <ol class="manual-list">
+              <li>Registra tu finca y lotes en la sección <strong>Mi Finca</strong>.</li>
+              <li>
+                Desde el <strong>Catálogo de Detección</strong>, elige el cultivo y sube una foto de la hoja
+                que quieras analizar.
+              </li>
+              <li>
+                Revisa el resultado del diagnóstico y la confianza del modelo. Si tienes dudas, abre la ficha
+                en la <strong>Biblioteca</strong>.
+              </li>
+              <li>
+                Usa la sección <strong>Recomendaciones</strong> para ver sugerencias de riego, siembra y manejo
+                según el clima y el calendario lunar.
+              </li>
+              <li>
+                Consulta el <strong>Boletín</strong> para estar al día con alertas y noticias agrícolas.
+              </li>
+            </ol>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

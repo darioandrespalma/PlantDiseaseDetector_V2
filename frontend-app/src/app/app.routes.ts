@@ -10,13 +10,14 @@ import { TareasComponent } from './components/tareas/tareas';
 import { DetectionComponent } from './components/detection/detection';
 import { ResultComponent } from './components/result/result';
 import { RecomendacionComponent } from './components/recomendacion/recomendacion';
+import { MapSelectorComponent } from './components/map-selector/map-selector';
+import { BibliotecaComponent } from './components/biblioteca/biblioteca';
+
 
 export const routes: Routes = [
-  // 🔓 RUTAS PÚBLICAS
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
-  // 🔐 RUTAS PRIVADAS CON LAYOUT PRINCIPAL
   {
     path: '',
     component: MainLayoutComponent,
@@ -25,18 +26,19 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'finca', component: FincaComponent },
       { path: 'tareas', component: TareasComponent },
-
-      // FLUJO DE DETECCIÓN
       { path: 'deteccion/:crop', component: DetectionComponent },
       { path: 'result/:id', component: ResultComponent },
 
-      // 🌾 AQUÍ VA RECOMENDACIONES
+      // ya tenías:
       { path: 'recomendaciones', component: RecomendacionComponent },
 
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+      // ✨ NUEVA RUTA DEL MAPA
+      { path: 'mapa', component: MapSelectorComponent },
+      { path: 'biblioteca', component: BibliotecaComponent },
+
+      { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
     ]
   },
 
-  // Cualquier ruta rara -> login
   { path: '**', redirectTo: '/login' }
 ];

@@ -1,0 +1,60 @@
+<div class="map-page">
+
+  <h2>🌍 Selecciona tu Finca en el Mapa</h2>
+  <p class="subtitle">
+    Haz clic sobre el mapa para marcar tu finca y obtener recomendaciones de
+    siembra basadas en el clima real de esa ubicación.
+  </p>
+
+  <!-- Mapa -->
+  <div #mapContainer class="leaflet-map-container"></div>
+
+  <!-- Coordenadas seleccionadas -->
+  <div class="coords-panel" *ngIf="selectedLat !== null && selectedLon !== null">
+    <p><strong>Latitud:</strong> {{ selectedLat | number:'1.4-4' }}</p>
+    <p><strong>Longitud:</strong> {{ selectedLon | number:'1.4-4' }}</p>
+
+    <button (click)="obtenerRecomendaciones()">
+      Obtener recomendaciones para este punto
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Cargando recomendaciones...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <!-- Recomendaciones -->
+  <div *ngFor="let rec of recomendaciones" class="rec-card">
+    <div class="rec-header">
+      <h3>{{ rec.fecha | date:'fullDate' }}</h3>
+      <div class="estrellas">{{ generarEstrellas(rec.estrellas) }}</div>
+    </div>
+
+    <div class="metrics">
+      <span>🌡️ {{ rec.temp | number:'1.1-1' }} °C</span>
+      <span>💧 {{ rec.lluvia | number:'1.1-1' }} mm</span>
+      <span>🌙 {{ rec.faseLunar }}</span>
+    </div>
+
+    <div class="motivos">
+      <h4>Por qué es buen día:</h4>
+      <ul>
+        <li *ngFor="let m of rec.motivos">{{ m }}</li>
+      </ul>
+    </div>
+
+    <div *ngIf="rec.alertas.length" class="alertas">
+      <h4>⚠️ Alertas:</h4>
+      <ul>
+        <li *ngFor="let a of rec.alertas">{{ a }}</li>
+      </ul>
+    </div>
+
+    <div class="score">Score: {{ rec.score }}/100</div>
+  </div>
+
+</div>
