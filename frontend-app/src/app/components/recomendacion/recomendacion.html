@@ -1,0 +1,50 @@
+<div class="recomendaciones-container">
+  <h2>🌾 Recomendaciones de Siembra Inteligente</h2>
+
+  <div *ngIf="loading" class="loading">
+    Cargando recomendaciones...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div
+    *ngFor="let rec of recomendaciones"
+    class="card"
+    [class.excelente]="esRecomendacionExelente(rec)"
+  >
+    <div class="card-header">
+      <h3>{{ rec.fecha | date : 'fullDate' }}</h3>
+      <div class="estrellas">{{ generarEstrellas(rec.estrellas) }}</div>
+    </div>
+
+    <div class="metrics">
+      <span class="metric">🌡️ {{ rec.temp | number : '1.0-1' }}°C</span>
+      <span class="metric">💧 {{ rec.lluvia | number : '1.0-1' }}mm</span>
+      <span class="metric">🌙 {{ rec.faseLunar }}</span>
+    </div>
+
+    <div class="motivos">
+      <h4>Por qué es buen día:</h4>
+      <ul>
+        <li *ngFor="let motivo of rec.motivos">{{ motivo }}</li>
+      </ul>
+    </div>
+
+    <div *ngIf="rec.alertas.length > 0" class="alertas">
+      <h4>⚠️ Consideraciones:</h4>
+      <ul>
+        <li *ngFor="let alerta of rec.alertas">{{ alerta }}</li>
+      </ul>
+    </div>
+
+    <div class="score">
+      Score: {{ rec.score }}/100
+    </div>
+  </div>
+
+  <div *ngIf="!loading && recomendaciones.length === 0 && !error" class="empty">
+    No hay recomendaciones disponibles para este cultivo y ubicación.
+  </div>
+</div>

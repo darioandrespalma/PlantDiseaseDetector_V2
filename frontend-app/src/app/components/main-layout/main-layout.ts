@@ -60,14 +60,15 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   userName = 'Agricultor';
   currentRoute = '';
   
-  menuItems = [
-    { name: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { name: 'Mi Finca', icon: 'agriculture', route: '/finca' },
-    { name: 'Tareas', icon: 'task_alt', route: '/tareas' },
-    { name: 'Recomendaciones', icon: 'lightbulb_outline', route: '/reco' },
-    { name: 'Boletín', icon: 'campaign', route: '/boletin' },
-    { name: 'Biblioteca', icon: 'library_books', route: '/biblioteca' },
-  ];
+menuItems = [
+  { name: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+  { name: 'Mi Finca', icon: 'agriculture', route: '/finca' },
+  { name: 'Tareas', icon: 'task_alt', route: '/tareas' },
+  { name: 'Recomendaciones', icon: 'lightbulb_outline', route: '/recomendaciones' },
+  { name: 'Boletín', icon: 'campaign', route: '/boletin' },
+  { name: 'Biblioteca', icon: 'library_books', route: '/biblioteca' },
+];
+
 
   private destroy$ = new Subject<void>();
   private _mobileQueryListener: () => void;
