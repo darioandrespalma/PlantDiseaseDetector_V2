@@ -1,6 +1,14 @@
-venv/ 
-__pycache__/ 
-*.pyc 
-.env 
-/dataset/ 
+# Node
+node_modules/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# Data / Models
+/dataset/
 /ia-service-python/models/

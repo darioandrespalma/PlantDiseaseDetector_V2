@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment.development';
+// Eliminamos la importación de environment que causaba error TS2307
 
 export interface Recomendacion {
   fecha: string;
+  fechaFormateada: string;
   score: number;
   estrellas: number;
   motivos: string[];
@@ -12,26 +13,29 @@ export interface Recomendacion {
   temp: number;
   lluvia: number;
   faseLunar: string;
-  cultivo: string;
+  condiciones: any;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClimateService {
-  private apiUrl = `${environment.apiUrl}/api/climate`;
+  private http = inject(HttpClient);
+  
+  // URL directa para desarrollo local
+  private apiUrl = 'http://localhost:3000/api/climate'; 
 
-  constructor(private http: HttpClient) {}
+  // El método se llama obtenerRecomendacion
+  obtenerRecomendacion(cultivo: string, lat: number, lon: number): Observable<any> {
+    const params = new HttpParams()
+      .set('cultivo', cultivo)
+      .set('lat', lat.toString())
+      .set('lon', lon.toString());
 
-  getRecomendacion(
-    cultivo: string,
-    lat: number,
-    lon: number
-  ): Observable<{ success: boolean; recomendaciones: Recomendacion[] }> {
-    return this.http.get<{ success: boolean; recomendaciones: Recomendacion[] }>(
-      `${this.apiUrl}/recomendacion?cultivo=${encodeURIComponent(
-        cultivo
-      )}&lat=${lat}&lon=${lon}`
-    );
+    return this.http.get<any>(`${this.apiUrl}/recomendacion`, { params });
+  }
+
+  obtenerCultivos(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/cultivos`);
   }
 }

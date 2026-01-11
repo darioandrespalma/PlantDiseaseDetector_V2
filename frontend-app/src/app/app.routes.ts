@@ -15,9 +15,11 @@ import { BibliotecaComponent } from './components/biblioteca/biblioteca';
 
 
 export const routes: Routes = [
+  // RUTAS PÚBLICAS (Sin Guard)
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
+  // RUTAS PRIVADAS (Protegidas por authGuard)
   {
     path: '',
     component: MainLayoutComponent,

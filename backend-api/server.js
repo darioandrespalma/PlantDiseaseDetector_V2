@@ -1,6 +1,7 @@
 // 1. Cargar variables de entorno ANTES de todo
 require('dotenv').config();
 
+const helmet = require('helmet');
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -18,6 +19,7 @@ const FRONTEND_ORIGIN = process.env.FRONTEND_URL || 'http://localhost:4200';
 const authRoutes = require('./routes/auth');
 const predictRoutes = require('./routes/predict');
 const climateRoutes = require('./routes/climate');
+const loteRoutes = require('./routes/lotes');
 
 // Connect to database
 connectDB();
@@ -38,11 +40,13 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev')); // Logging middleware
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(helmet()); // Security middleware
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/predict', predictRoutes);
 app.use('/api/climate', climateRoutes);
+app.use('/api/lotes', loteRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

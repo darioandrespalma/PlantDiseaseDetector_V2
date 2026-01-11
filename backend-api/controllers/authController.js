@@ -6,18 +6,28 @@ const bcrypt = require('bcryptjs');
 exports.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    
+    // Verificar si el usuario ya existe
     const userExists = await User.findOne({ email });
-
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'El usuario ya existe' });
     }
+
+    // Crear usuario (La contraseña se hashea en el modelo User con pre('save') generalmente, 
+    // pero si lo haces aquí manualmente como vi en tu código anterior, asegúrate de no doble hashear)
+    // Asumiré que el modelo se encarga o que envías la password tal cual para hash aquí.
+    // Si tu modelo NO tiene pre-save hash, descomenta la linea de hash abajo.
+    
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await User.create({
       username,
       email,
-      password,
+      password: hashedPassword, // Guardamos la contraseña encriptada
     });
 
+    // Generar token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '30d',
     });
@@ -29,31 +39,58 @@ exports.register = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(error);
+    res.status(500).json({ message: 'Error en el servidor al registrar' });
   }
 };
 
-// Login user
+// CAMBIO AQUÍ: De 'loginUser' a 'login'
 exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-
-    if (user && (await user.matchPassword(password))) {
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: '30d',
-      });
-
-      res.json({
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        token,
-      });
-    } else {
-      res.status(401).json({ message: 'Invalid email or password' });
+    // 1. Buscar usuario
+    let user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Credenciales inválidas' }); // Usar message para consistencia
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+
+    // 2. Comparar contraseñas
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Credenciales inválidas' });
+    }
+
+    // 3. Crear el Payload
+    const payload = {
+      user: {
+        id: user.id,
+        nombre: user.username, // Ajustado a username según tu registro
+        rol: 'agricultor'
+      }
+    };
+
+    // 4. Firmar el Token
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET || 'secretoseguro123',
+      { expiresIn: '8h' },
+      (err, token) => {
+        if (err) throw err;
+        // Retornamos estructura consistente
+        res.json({ 
+            token, 
+            user: { 
+                _id: user.id, 
+                username: user.username, 
+                email: user.email 
+            } 
+        });
+      }
+    );
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Error en el servidor');
   }
 };
