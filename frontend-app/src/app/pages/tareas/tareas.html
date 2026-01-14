@@ -1,0 +1,36 @@
+<div class="page">
+  <h2>Agenda de Tareas</h2>
+  <p class="sub">Planificación operativa con sincronización lunar 🌙</p>
+
+  <!-- FORMULARIO -->
+  <div class="form">
+    <input placeholder="Título" [(ngModel)]="titulo" />
+    <select [(ngModel)]="tipo">
+      <option *ngFor="let t of tipos">{{ t }}</option>
+    </select>
+    <input type="date" [(ngModel)]="fecha" />
+    <button (click)="crearTarea()">Agregar</button>
+  </div>
+
+  <div class="header">
+    <button (click)="mesAnterior()">◀</button>
+    <h3>{{ nombreMes() }}</h3>
+    <button (click)="mesSiguiente()">▶</button>
+  </div>
+
+
+  <!-- CALENDARIO -->
+  <div class="calendar">
+    <div class="day" *ngFor="let d of diasDelMes()">
+      <div class="day-header">
+        <span>{{ d }}</span>
+        <span class="moon">{{ faseLunar(d) }}</span>
+      </div>
+
+      <div class="task" *ngFor="let t of tareasDelDia(d)">
+        <input type="checkbox" [(ngModel)]="t.completada" />
+        <span [class.done]="t.completada">{{ t.titulo }} ({{ t.tipo }})</span>
+      </div>
+    </div>
+  </div>
+</div>

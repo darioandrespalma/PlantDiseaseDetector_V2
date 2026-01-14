@@ -1,0 +1,12 @@
+.page { padding: 16px; }
+.sub { opacity: 0.8; margin-bottom: 16px; }
+
+.filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
+select { padding: 10px; border-radius: 10px; border: 1px solid #333; background: transparent; color: inherit; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.card { border: 1px solid #333; border-radius: 14px; padding: 14px; }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 999px; border: 1px solid #444; margin-right: 6px; font-size: 12px; opacity: 0.9; }
+.secondary { opacity: 0.75; }
+.empty { opacity: 0.8; padding: 12px; }
