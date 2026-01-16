@@ -19,6 +19,8 @@ interface FichaEnfermedad {
   manejoOrganico: string;
   manejoQuimico: string;
   relacionIA: string;
+  severidad: 'alta' | 'media' | 'baja';
+  temporada: string;
 }
 
 @Component({
@@ -44,6 +46,8 @@ export class BibliotecaComponent {
     {
       cultivo: 'Banano',
       enfermedad: 'Sigatoka negra',
+      severidad: 'alta',
+      temporada: '🌧️ Épocas lluviosas',
       sintomas:
         'Manchas ovaladas de color café oscuro con halo amarillento en el tercio medio e inferior de la hoja. ' +
         'Las hojas se secan desde la punta hacia la base y pierden área verde rápidamente.',
@@ -67,6 +71,8 @@ export class BibliotecaComponent {
     {
       cultivo: 'Arroz',
       enfermedad: 'Tizón (Blast)',
+      severidad: 'alta',
+      temporada: '☀️ Climas cálido-húmedos',
       sintomas:
         'Lesiones pequeñas que crecen hasta formar manchas elípticas de color gris claro con bordes café oscuro. ' +
         'Pueden aparecer en hojas, nudos y panículas, causando el secado de la planta.',
@@ -87,6 +93,8 @@ export class BibliotecaComponent {
     {
       cultivo: 'Café',
       enfermedad: 'Roya del café',
+      severidad: 'media',
+      temporada: '🌡️ Todo el año (clima templado)',
       sintomas:
         'Pequeñas pústulas de color anaranjado en la cara inferior de la hoja. ' +
         'Las hojas se tornan amarillas y terminan cayendo, reduciendo la producción.',
