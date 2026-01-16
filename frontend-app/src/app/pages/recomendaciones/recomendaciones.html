@@ -1,0 +1,36 @@
+<div class="page">
+  <h2>Recomendaciones (Base de Conocimiento)</h2>
+  <p class="sub">
+    Aquí el usuario busca activamente información técnica (biblioteca interactiva).
+  </p>
+
+  <div class="filters">
+    <div class="field">
+      <label>Cultivo</label>
+      <select [(ngModel)]="cultivoSel">
+        <option *ngFor="let c of cultivos" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Tema</label>
+      <select [(ngModel)]="temaSel">
+        <option *ngFor="let t of temas" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card" *ngFor="let r of filtradas">
+      <div class="badge">{{ r.cultivo }}</div>
+      <div class="badge secondary">{{ r.tema }}</div>
+      <h3>{{ r.titulo }}</h3>
+      <p>{{ r.detalle }}</p>
+    </div>
+
+    <div class="empty" *ngIf="filtradas.length === 0">
+      No hay resultados para esos filtros.
+    </div>
+  </div>
+</div>
+
