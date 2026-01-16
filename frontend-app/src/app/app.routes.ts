@@ -9,6 +9,7 @@ import { DetectionComponent } from './components/detection/detection';
 import { ResultComponent } from './components/result/result';
 import { MapSelectorComponent } from './components/map-selector/map-selector';
 import { BibliotecaComponent } from './components/biblioteca/biblioteca';
+import { BoletinComponent } from './components/boletin/boletin';
 
 import { TareasComponent } from './components/tareas/tareas';
 import { RecomendacionesComponent } from './components/recomendaciones/recomendaciones';
@@ -39,6 +40,7 @@ export const routes: Routes = [
       { path: 'result/:id', component: ResultComponent },
       { path: 'mapa', component: MapSelectorComponent },
       { path: 'biblioteca', component: BibliotecaComponent },
+      { path: 'boletin', component: BoletinComponent },
 
       { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     ]
