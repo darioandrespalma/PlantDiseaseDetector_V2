@@ -18,13 +18,11 @@ exports.register = async (req, res) => {
     // Asumiré que el modelo se encarga o que envías la password tal cual para hash aquí.
     // Si tu modelo NO tiene pre-save hash, descomenta la linea de hash abajo.
     
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await User.create({
       username,
       email,
-      password: hashedPassword, // Guardamos la contraseña encriptada
+      password: req.body.password
     });
 
     // Generar token

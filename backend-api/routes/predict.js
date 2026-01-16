@@ -1,21 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const protect = require('../middleware/authMiddleware');
+const predictionController = require('../controllers/predictionController');
+const authMiddleware = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
-const { 
-  predictDisease, 
-  getPredictionHistory,
-  getPredictionById
-} = require('../controllers/predictionController');
+// POST /api/predict - Requiere token e imagen
+router.post('/', authMiddleware, upload.single('image'), predictionController.predictDisease);
 
-// Get user's prediction history (protected route)
-router.get('/history', protect, getPredictionHistory);
+// GET /api/predict/history - Historial del usuario
+router.get('/history', authMiddleware, predictionController.getPredictionHistory);
 
-// Get specific prediction by ID (protected route)
-router.get('/:id', protect, getPredictionById);
-
-// Upload image and get prediction (protected route)
-router.post('/upload', protect, upload.single('image'), predictDisease);
+// GET /api/predict/:id - Detalle
+router.get('/:id', authMiddleware, predictionController.getPredictionById);
 
 module.exports = router;
