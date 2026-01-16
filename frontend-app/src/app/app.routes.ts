@@ -10,8 +10,8 @@ import { ResultComponent } from './components/result/result';
 import { MapSelectorComponent } from './components/map-selector/map-selector';
 import { BibliotecaComponent } from './components/biblioteca/biblioteca';
 
-import { TareasComponent } from './pages/tareas/tareas';
-import { RecomendacionesComponent } from './pages/recomendaciones/recomendaciones';
+import { TareasComponent } from './components/tareas/tareas';
+import { RecomendacionesComponent } from './components/recomendaciones/recomendaciones';
 
 
 import { authGuard } from './guards/auth-guard';
