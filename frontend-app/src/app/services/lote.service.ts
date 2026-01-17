@@ -6,14 +6,13 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class LoteService {
-  private apiUrl = 'http://localhost:5000/api'; // Ajusta si tu puerto es diferente
+  // 🔴 CAMBIO OBLIGATORIO: Cambia 5000 por 3000
+  private apiUrl = 'http://127.0.0.1:3000/api'; 
 
   constructor(private http: HttpClient) {}
 
-  // Obtener lista de cultivos para el select del formulario
   getCultivos(): Observable<any> {
     return this.http.get(`${this.apiUrl}/cultivos`); 
-    // Nota: Si no tienes esta ruta aún, hardcodearemos la lista en el componente temporalmente.
   }
 
   crearLote(data: any): Observable<any> {

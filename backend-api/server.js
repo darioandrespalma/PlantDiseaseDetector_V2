@@ -1,6 +1,6 @@
-require('dotenv').config(); // 1. Cargar variables de entorno al inicio
+require('dotenv').config(); 
 const express = require('express');
-const http = require('http'); // Necesario para unir Express + Socket.IO
+const http = require('http'); 
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -8,22 +8,31 @@ const path = require('path');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 
-// --- Importación de Modelos (para rutas inline) ---
-const Bulletin = require('./models/Bulletin');
+// --- Importación de Controladores ---
+const cultivoController = require('./controllers/cultivoController');
 
 // --- Importación de Rutas ---
 const authRoutes = require('./routes/auth');
 const predictRoutes = require('./routes/predict');
 const climateRoutes = require('./routes/climate');
-const loteRoutes = require('./routes/lotes');
-const taskRoutes = require('./routes/tasks');      // ✅ Nueva ruta: Tareas
-const dashboardRoutes = require('./routes/dashboard'); // ✅ Nueva ruta: Dashboard
+const loteRoutes = require('./routes/lotes'); // ✅ Solo una vez
+const taskRoutes = require('./routes/tasks');      
+const dashboardRoutes = require('./routes/dashboard');
+const Bulletin = require('./models/Bulletin'); // Modelo para ruta inline
 
 // --- Configuración Inicial ---
 const app = express();
-const httpServer = http.createServer(app); // Creamos el servidor HTTP envolviendo a Express
-const PORT = process.env.PORT || 5000;
-const FRONTEND_ORIGIN = process.env.FRONTEND_URL || 'http://localhost:4200';
+const httpServer = http.createServer(app); 
+
+// 🟢 CONFIGURACIÓN PUERTO: Usa el del .env (3000)
+const PORT = process.env.PORT || 3000;
+
+// 🟢 CORS ROBUSTO: Permite Angular en localhost y 127.0.0.1
+const allowedOrigins = [
+  'http://localhost:4200',
+  'http://127.0.0.1:4200',
+  process.env.FRONTEND_URL
+].filter(Boolean);
 
 // --- Conexión a Base de Datos ---
 connectDB();
@@ -31,89 +40,77 @@ connectDB();
 // --- Configuración de Socket.IO ---
 const io = new Server(httpServer, {
   cors: {
-    origin: FRONTEND_ORIGIN,
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true
   }
 });
 
-// Guardamos 'io' en la app para usarlo en los controladores (req.app.get('io'))
 app.set('io', io);
 
 // Eventos de WebSockets
 io.on('connection', (socket) => {
   console.log(`🔌 Cliente conectado: ${socket.id}`);
-
-  // Unirse a sala personal (para notificaciones privadas)
   socket.on('join_room', (userId) => {
     socket.join(`user_${userId}`);
-    console.log(`👤 Usuario unido a sala: user_${userId}`);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('❌ Cliente desconectado');
   });
 });
 
 // --- Middlewares Globales ---
-app.use(helmet({ crossOriginResourcePolicy: false })); // Seguridad Headers (ajustado para cargar imágenes)
+app.use(helmet({ crossOriginResourcePolicy: false })); 
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
+  origin: allowedOrigins,
   credentials: true
 }));
-app.use(morgan('dev')); // Logging de peticiones en consola
-app.use(express.json()); // Parsear JSON body
+app.use(morgan('dev')); 
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 
-// --- Servir Archivos Estáticos (Imágenes subidas) ---
-// Permite acceder a http://localhost:5000/uploads/imagen.jpg
+// --- Archivos Estáticos ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- Definición de Endpoints (API) ---
 app.use('/api/auth', authRoutes);
-app.use('/api/predict', predictRoutes); // Este controlador ya maneja la lógica con Python
+app.use('/api/predict', predictRoutes); 
 app.use('/api/climate', climateRoutes);
 app.use('/api/lotes', loteRoutes);
-app.use('/api/tasks', taskRoutes);         // ✅ CRUD de Tareas
-app.use('/api/dashboard', dashboardRoutes); // ✅ Resumen para la Home
+app.use('/api/tasks', taskRoutes);         
+app.use('/api/dashboard', dashboardRoutes); 
 
-// --- Ruta Boletín (Inline por simplicidad) ---
+// ✅ RUTA CULTIVOS (Necesaria para el selector del mapa)
+const routerCultivos = express.Router();
+routerCultivos.get('/', cultivoController.obtenerCultivos);
+app.use('/api/cultivos', routerCultivos);
+
+// --- Ruta Boletín ---
 app.get('/api/bulletin', async (req, res) => {
   try {
-    // Obtener boletines recientes (últimos 10)
     const news = await Bulletin.find().sort({ fechaPublicacion: -1 }).limit(10);
     res.json(news);
   } catch (err) {
-    console.error('Error boletín:', err);
     res.status(500).json({ message: 'Error obteniendo noticias' });
   }
 });
 
-// --- Health Check (Para verificar que el servidor vive) ---
+// --- Health Check ---
 app.get('/', (req, res) => {
-  res.send('🌿 Plant Disease Detector V2 API - Online & Ready');
+  res.send(`🌿 Plant Disease Detector V2 API - Running on Port ${PORT}`);
 });
 
-// --- Tareas Programadas (Cron Jobs) ---
-// Se ejecuta en segundo plano (ej. recomendaciones diarias)
+// --- Cron Jobs ---
 require('./jobs/recomendacionJob'); 
 
 // --- Manejo de Errores Global ---
 app.use((err, req, res, next) => {
-  console.error('🔥 Error no controlado:', err.stack);
-  res.status(500).json({ 
-    success: false, 
-    message: 'Error interno del servidor', 
-    error: process.env.NODE_ENV === 'development' ? err.message : {} 
-  });
+  console.error('🔥 Error:', err.stack);
+  res.status(500).json({ success: false, message: 'Error interno', error: err.message });
 });
 
 // --- Iniciar Servidor ---
-// ⚠️ IMPORTANTE: Usamos httpServer.listen, NO app.listen para que funcionen los Sockets
-httpServer.listen(PORT, () => {
+// Escuchamos en 0.0.0.0 para asegurar visibilidad en la red local
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`=================================`);
   console.log(`🚀 Servidor corriendo en puerto: ${PORT}`);
-  console.log(`🔗 Frontend permitido: ${FRONTEND_ORIGIN}`);
-  console.log(`📡 Socket.IO activo`);
+  console.log(`🔗 Orígenes permitidos: ${allowedOrigins.join(', ')}`);
   console.log(`=================================`);
 });

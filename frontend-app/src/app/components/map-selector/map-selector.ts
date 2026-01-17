@@ -132,27 +132,35 @@ export class MapSelectorComponent implements AfterViewInit {
   }
 
   guardarFinca(formData: any, lat: number, lon: number) {
-    const payload = {
-      ...formData,
-      lat,
-      lon
-    };
+      // Construimos el objeto exacto que espera el backend
+      const payload = {
+        nombre: formData.nombre,
+        cultivoId: formData.cultivoId, // Asegúrate de que el select use este nombre
+        // Enviamos lat/lon sueltos porque tu controlador los lee así: const { lat, lon } = req.body;
+        lat: lat,
+        lon: lon,
+        alertasActivas: formData.alertasActivas,
+        frecuenciaAlertas: formData.frecuenciaAlertas
+      };
 
-    this.loading = true;
-    this.loteService.crearLote(payload).subscribe({
-      next: (res) => {
-        this.toastr.success('Hacienda registrada y alertas configuradas', '¡Éxito!');
-        this.loading = false;
-        // Opcional: Llamar a obtenerRecomendaciones automáticamente
-        this.obtenerRecomendaciones();
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error('Error al guardar la finca', 'Error');
-        this.loading = false;
-      }
-    });
-  }
+      console.log('📤 Enviando payload:', payload); // Para depuración en consola
+
+      this.loading = true;
+      this.loteService.crearLote(payload).subscribe({
+        next: (res) => {
+          this.toastr.success('Hacienda registrada y alertas configuradas', '¡Éxito!');
+          this.loading = false;
+          this.obtenerRecomendaciones(); // Cargar datos del clima
+        },
+        error: (err) => {
+          console.error('🔥 Error Backend:', err);
+          // Mostrar mensaje específico si el backend lo envía
+          const msg = err.error?.error || 'Error al guardar la finca';
+          this.toastr.error(msg, 'Error de Validación');
+          this.loading = false;
+        }
+      });
+    }
 
   // TU MÉTODO EXISTENTE (Se mantiene igual, para consultas manuales)
   obtenerRecomendaciones() {

@@ -33,10 +33,13 @@ import { LoteService } from '../../services/lote.service';
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Tipo de Cultivo</mat-label>
           <mat-select formControlName="cultivoId">
-            <mat-option value="65a...ID_MAIZ">Maíz</mat-option>
-            <mat-option value="65a...ID_CAFE">Café</mat-option>
-            <mat-option value="65a...ID_BANANO">Banano</mat-option>
-            <mat-option *ngFor="let c of cultivos" [value]="c._id">{{ c.nombre }}</mat-option>
+            <mat-option *ngFor="let c of cultivos" [value]="c._id">
+              {{ c.nombre }}
+            </mat-option>
+
+            <mat-option *ngIf="cultivos.length === 0" disabled>
+              Cargando cultivos o No hay datos...
+            </mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -55,11 +58,10 @@ import { LoteService } from '../../services/lote.service';
             </mat-select>
           </mat-form-field>
         </div>
-
       </mat-dialog-content>
 
       <mat-dialog-actions align="end">
-        <button mat-button type="button" (click)="cerrar()">Solo ver clima</button>
+        <button mat-button type="button" (click)="cerrar()">Cancelar</button>
         <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
           Guardar Finca
         </button>
@@ -87,13 +89,20 @@ export class LoteDialogComponent implements OnInit {
       nombre: ['', Validators.required],
       cultivoId: ['', Validators.required],
       alertasActivas: [false],
-      frecuenciaAlertas: ['semanal'] // Valor por defecto
+      frecuenciaAlertas: ['semanal']
     });
   }
 
   ngOnInit() {
-    // Si tienes la API de cultivos lista:
-    // this.loteService.getCultivos().subscribe(res => this.cultivos = res.data || res);
+    // Llamada al backend para llenar la lista
+    this.loteService.getCultivos().subscribe({
+      next: (res: any) => {
+        // Asegura leer 'data' si viene envuelto
+        this.cultivos = res.data || res; 
+        console.log('Cultivos cargados:', this.cultivos);
+      },
+      error: (err) => console.error('Error cargando cultivos:', err)
+    });
   }
 
   guardar() {
@@ -103,6 +112,6 @@ export class LoteDialogComponent implements OnInit {
   }
 
   cerrar() {
-    this.dialogRef.close(null); // Retorna null para indicar cancelación
+    this.dialogRef.close(null);
   }
 }
