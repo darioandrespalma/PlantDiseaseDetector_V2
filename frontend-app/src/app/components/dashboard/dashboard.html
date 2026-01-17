@@ -28,6 +28,7 @@
   <mat-card 
     *ngFor="let cultivo of cultivos" 
     class="cultivo-card glass-card"
+    [class.glass-card]="true"
     [style.--card-accent]="cultivo.color">
     
     <!-- SVG de cultivo con overlay -->

@@ -111,7 +111,7 @@
   border: 1px solid var(--bg-card-border);
   backdrop-filter: var(--blur-medium);
   box-shadow: var(--shadow-medium);
-  padding: 2rem;
+  padding: 3rem 2.5rem;
   position: relative;
   overflow: hidden;
 }
@@ -184,10 +184,16 @@
   color: var(--text-secondary);
 }
 
+/* ========== CONTENEDOR DE CAMPOS DE FORMULARIO ========== */
+.form-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 /* ========== CAMPOS DE FORMULARIO ========== */
 .custom-field {
   width: 100%;
-  margin-bottom: 1.5rem;
   position: relative;
 }
 
@@ -233,7 +239,7 @@ mat-error mat-icon {
 /* ========== BOTÓN DE LOGIN ========== */
 .login-btn {
   width: 100%;
-  margin-top: 1rem;
+  margin-top: 2rem;
   padding: 0.75rem 0;
   border-radius: var(--radius-md);
   font-size: 1rem;

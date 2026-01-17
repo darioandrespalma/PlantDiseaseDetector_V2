@@ -52,9 +52,8 @@ Los modelos deben colocarse en la carpeta `models/`:
 ```
 ia-service-python/
 ├── models/
-│   ├── banana_leaf_disease_model.h5      (descargado)
-│   ├── arroz_modelo.pkl                   (descargado)
-│   └── coffee_leaf_disease_model.h5      (descargado)
+│   ├── banana_leaf_disease_model.h5
+│   └── coffee_leaf_disease_model.h5
 ├── app.py
 └── requirements.txt
 ```
@@ -84,19 +83,7 @@ El servicio estará disponible en `http://localhost:5001`
 **Entrada**: Imágenes RGB
 **Framework**: Keras/TensorFlow
 
-### 2. **Arroz** (Machine Learning - scikit-learn)
-
-**Archivo**: `arroz_modelo.pkl`
-
-**Clases**:
-- `Saludable` - Hoja sin enfermedad
-- `ManchaMarron` - Mancha Marrón
-- `Tizon` - Tizón
-
-**Entrada**: Imágenes redimensionadas a 100x100
-**Framework**: scikit-learn/joblib
-
-### 3. **Café** (Deep Learning - Keras)
+### 2. **Café** (Deep Learning - Keras)
 
 **Archivo**: `coffee_leaf_disease_model.h5`
 
@@ -136,29 +123,6 @@ Response: 200 OK
 }
 ```
 
-### Predicción para Arroz
-
-```http
-POST /predict/rice
-Content-Type: multipart/form-data
-
-Form Data:
-- image: [archivo JPG/PNG]
-
-Response: 200 OK
-{
-  "crop": "rice",
-  "prediction": "ManchaMarron",
-  "confidence": 0.8934,
-  "classes": {
-    "Saludable": 0.0834,
-    "ManchaMarron": 0.8934,
-    "Tizon": 0.0232
-  },
-  "timestamp": "2024-01-14T15:30:45.123Z"
-}
-```
-
 ### Predicción para Café
 
 ```http
@@ -192,7 +156,6 @@ Response: 200 OK
   "status": "healthy",
   "models_loaded": {
     "banana": true,
-    "rice": true,
     "coffee": true
   },
   "timestamp": "2024-01-14T15:30:45.123Z"
@@ -277,7 +240,6 @@ python-dotenv==1.0.0
 ```python
 MODEL_DIR = './models'  # Carpeta de modelos
 BANANA_MODEL_PATH = './models/banana_leaf_disease_model.h5'
-RICE_MODEL_PATH = './models/arroz_modelo.pkl'
 COFFEE_MODEL_PATH = './models/coffee_leaf_disease_model.h5'
 ```
 
@@ -286,9 +248,6 @@ COFFEE_MODEL_PATH = './models/coffee_leaf_disease_model.h5'
 ```python
 # Banano (se redimensiona automáticamente)
 # Café (se redimensiona automáticamente)
-
-# Arroz
-rice_fixed_size = (100, 100)
 ```
 
 ---
@@ -301,10 +260,6 @@ rice_fixed_size = (100, 100)
 # Predicción Banano
 curl -X POST http://localhost:5001/predict/banana \
   -F "image=@/path/to/banana_leaf.jpg"
-
-# Predicción Arroz
-curl -X POST http://localhost:5001/predict/rice \
-  -F "image=@/path/to/rice_leaf.jpg"
 
 # Predicción Café
 curl -X POST http://localhost:5001/predict/coffee \
@@ -385,7 +340,7 @@ CORS(app, origins=["http://localhost:4200", "http://ejemplo.com"])
 | Modelo | Tiempo Promedio |
 |--------|-----------------|
 | Banano | 80-150ms |
-| Arroz | 50-100ms |
+
 | Café | 80-150ms |
 
 *Tiempos en máquina estándar. Varía según hardware.*

@@ -44,7 +44,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.08));
 }
 
 .sidenav-header > * {
@@ -90,7 +90,7 @@
 }
 
 .active-item {
-  background: linear-gradient(135deg, var(--card-accent), var(--color-accent));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
   color: var(--text-on-primary);
 }
 
@@ -175,7 +175,7 @@
 }
 
 .user-card:hover .user-role {
-  color: rgba(255,255,255,0.8);
+  color: var(--text-on-primary);
 }
 
 .footer-actions {

@@ -2,11 +2,11 @@
 
 ## 📋 Descripción General
 
-**PlantDiseaseDetector V2** es una aplicación web avanzada para la detección y análisis de enfermedades en plantas utilizando inteligencia artificial. El sistema integra aprendizaje automático para identificar enfermedades en diferentes cultivos (Banano, Arroz, Café) y proporciona recomendaciones agrícolas basadas en condiciones climáticas y calendarios lunares.
+**PlantDiseaseDetector V2** es una aplicación web avanzada para la detección y análisis de enfermedades en plantas utilizando inteligencia artificial. El sistema integra aprendizaje automático para identificar enfermedades en diferentes cultivos (Banano y Café) y proporciona recomendaciones agrícolas basadas en condiciones climáticas y calendarios lunares.
 
 ### Características Principales
 
-- 🤖 **Detección de Enfermedades**: Modelos de IA para identificar enfermedades en Banano, Arroz y Café
+- 🤖 **Detección de Enfermedades**: Modelos de IA para identificar enfermedades en Banano y Café
 - 🌍 **Gestión de Lotes**: Administración completa de parcelas/lotes de cultivo con ubicación geográfica
 - 📊 **Monitoreo Climático**: Integración de datos climáticos en tiempo real para recomendaciones
 - 🌙 **Calendario Lunar**: Sistema de recomendaciones basadas en ciclos lunares
@@ -97,7 +97,6 @@ backend-api/
 
 #### Cultivo
 - Banano
-- Arroz
 - Café
 - (Extensible)
 
@@ -248,13 +247,7 @@ ng generate component component-name  # Generar componente
 - **Clases**: cordana, healthy, pestalotiopsis, sigatoka
 - **Framework**: Keras/TensorFlow
 
-#### 2. Arroz (Machine Learning)
-- **Modelo**: arroz_modelo.pkl
-- **Clases**: Saludable, ManchaMarron, Tizon
-- **Tamaño fijo**: 100x100 píxeles
-- **Framework**: scikit-learn
-
-#### 3. Café (Deep Learning)
+#### 2. Café (Deep Learning)
 - **Modelo**: coffee_leaf_disease_model.h5
 - **Clases**: healthy, miner, rust
 - **Framework**: Keras/TensorFlow
@@ -266,7 +259,6 @@ ia-service-python/
 ├── app.py                 # Aplicación principal Flask
 ├── models/
 │   ├── banana_leaf_disease_model.h5
-│   ├── arroz_modelo.pkl
 │   └── coffee_leaf_disease_model.h5
 └── requirements.txt       # Dependencias Python
 ```
@@ -274,7 +266,6 @@ ia-service-python/
 ### Endpoints Principales
 
 - `/predict/banana` - Predicción para Banano
-- `/predict/rice` - Predicción para Arroz
 - `/predict/coffee` - Predicción para Café
 
 ---

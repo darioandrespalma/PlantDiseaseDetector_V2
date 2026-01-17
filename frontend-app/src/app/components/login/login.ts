@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router'; // ✅ 1. Importar aquí
 import { CommonModule } from '@angular/common';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -26,20 +26,26 @@ import { formAnimations, logoAnimation, shakeAnimation } from '../../animations/
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule, RouterLink, ReactiveFormsModule,
-    MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    CommonModule, 
+    ReactiveFormsModule,
+    RouterLink, // ✅ 2. ¡MUY IMPORTANTE! Agregar esto aquí
+    MatCardModule, 
+    MatFormFieldModule, 
+    MatInputModule,
+    MatButtonModule, 
+    MatIconModule, 
+    MatProgressSpinnerModule
   ],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
   animations: [formAnimations, logoAnimation, shakeAnimation]
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  // ... el resto de tu código de la clase sigue igual ...
   form!: FormGroup;
   hide = true;
   isLoading = false;
   logoState = 'normal';
-  dark = false; // ✅ AÑADIDO: Propiedad para el template
 
   private destroy$ = new Subject<void>();
 
@@ -49,16 +55,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     private ws: WebsocketService,
     private router: Router,
     private toast: ToastService,
-    public theme: ThemeService // ✅ CAMBIADO A PUBLIC
+    public theme: ThemeService 
   ) {}
 
   ngOnInit() {
     this.initForm();
     this.animateLogo();
-    
-    // ✅ Sincronizar propiedad dark con el servicio
-    this.dark = this.theme.isDark();
-    this.theme.dark$.pipe(takeUntil(this.destroy$)).subscribe(v => this.dark = v);
   }
 
   private initForm() {
@@ -78,15 +80,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   get email() { return this.form.get('email'); }
   get password() { return this.form.get('password'); }
 
-  toggleDark() {
-    this.theme.toggle();
-  }
-
   submit() {
     if (this.form.invalid) {
       this.toast.warning('🌱 Completa los campos correctamente', 'Aviso');
       this.form.markAllAsTouched();
-      // Trigger shake animation
       this.form.setErrors({ 'invalid': true });
       setTimeout(() => this.form.setErrors(null), 500);
       return;
@@ -111,7 +108,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         }
       });
   }
-  
 
   ngOnDestroy() {
     this.destroy$.next();

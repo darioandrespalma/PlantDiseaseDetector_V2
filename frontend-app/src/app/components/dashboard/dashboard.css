@@ -99,13 +99,6 @@
 /* ========== TARJETA GLASSMORPHISM ========== */
 .cultivo-card {
   --card-accent: var(--color-primary);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  border: 1px solid var(--bg-card-border);
-  backdrop-filter: var(--blur-medium);
-  box-shadow: var(--shadow-medium);
-  overflow: hidden;
-  transition: all var(--transition-medium);
   position: relative;
   height: 100%;
   display: flex;
@@ -181,7 +174,7 @@ mat-card-header {
   font-family: 'Montserrat', sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-primary);
   margin-bottom: 0.5rem;
 }
 

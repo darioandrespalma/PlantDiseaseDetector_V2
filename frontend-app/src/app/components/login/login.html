@@ -1,9 +1,7 @@
-<!-- Fondo con partículas -->
 <div class="background">
   <div class="particles" aria-hidden="true"></div>
 </div>
 
-<!-- Logo con animación lunar -->
 <div class="app-header" [@logoAnimation]="logoState">
   <div class="logo-container">
     <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -18,23 +16,8 @@
   <p class="app-subtitle">Asistencia Agrícola Inteligente</p>
 </div>
 
-<!-- Contenedor principal con animaciones -->
 <main class="login-container" [@formAnimations]>
   <mat-card class="login-card">
-    <!-- Toggle tema -->
-    <button 
-      class="theme-toggle" 
-      mat-icon-button 
-      (click)="toggleDark()" 
-      aria-label="Cambiar tema"
-      [class.dark]="theme.isDark()">
-      <mat-icon class="theme-icon">
-        <span class="sun-icon">☀️</span>
-        <span class="moon-icon">🌙</span>
-      </mat-icon>
-    </button>
-
-    <!-- Header -->
     <mat-card-header class="card-header">
       <mat-card-title class="card-title">Iniciar Sesión</mat-card-title>
       <mat-card-subtitle class="card-subtitle">
@@ -42,64 +25,60 @@
       </mat-card-subtitle>
     </mat-card-header>
 
-    <!-- Formulario -->
     <mat-card-content class="card-content">
       <form [formGroup]="form" (ngSubmit)="submit()">
-        <!-- Email -->
-        <mat-form-field 
-          class="anim-item custom-field" 
-          appearance="fill"
-          [@shake]="form.errors?.['invalid'] ? 'error' : 'void'"> <!-- ✅ CORREGIDO -->
-          <mat-label class="field-label">Correo electrónico</mat-label>
-          <input 
-            matInput 
-            type="email" 
-            formControlName="email"
-            class="field-input"
-            placeholder="tu@email.com">
-          <mat-icon matPrefix class="field-icon">alternate_email</mat-icon>
-          <mat-error *ngIf="email?.errors?.['required']"> <!-- ✅ CORREGIDO -->
-            <mat-icon>error</mat-icon>
-            El correo es obligatorio
-          </mat-error>
-          <mat-error *ngIf="email?.errors?.['email']"> <!-- ✅ CORREGIDO -->
-            <mat-icon>warning</mat-icon>
-            Formato inválido
-          </mat-error>
-        </mat-form-field>
+        
+        <div class="form-fields-container">
+          
+          <mat-form-field 
+            class="anim-item custom-field" 
+            appearance="fill"
+            [@shake]="form.errors?.['invalid'] ? 'error' : 'void'">
+            <mat-label class="field-label">Correo electrónico</mat-label>
+            <input 
+              matInput 
+              type="email" 
+              formControlName="email"
+              class="field-input"
+              placeholder="tu@email.com">
+            <mat-icon matPrefix class="field-icon">alternate_email</mat-icon>
+            <mat-error *ngIf="email?.errors?.['required']">
+              <mat-icon>error</mat-icon> El correo es obligatorio
+            </mat-error>
+            <mat-error *ngIf="email?.errors?.['email']">
+              <mat-icon>warning</mat-icon> Formato inválido
+            </mat-error>
+          </mat-form-field>
 
-        <!-- Password -->
-        <mat-form-field 
-          class="anim-item custom-field" 
-          appearance="fill"
-          [@shake]="form.errors?.['invalid'] ? 'error' : 'void'"> <!-- ✅ CORREGIDO -->
-          <mat-label class="field-label">Contraseña</mat-label>
-          <input 
-            matInput 
-            [type]="hide ? 'password' : 'text'" 
-            formControlName="password"
-            class="field-input"
-            placeholder="••••••••">
-          <mat-icon matPrefix class="field-icon">lock</mat-icon>
-          <button 
-            mat-icon-button 
-            matSuffix 
-            type="button" 
-            (click)="hide = !hide"
-            class="toggle-password">
-            <mat-icon>{{ hide ? 'visibility' : 'visibility_off' }}</mat-icon>
-          </button>
-          <mat-error *ngIf="password?.errors?.['required']"> <!-- ✅ CORREGIDO -->
-            <mat-icon>error</mat-icon>
-            La contraseña es obligatoria
-          </mat-error>
-          <mat-error *ngIf="password?.errors?.['minlength']"> <!-- ✅ CORREGIDO -->
-            <mat-icon>warning</mat-icon>
-            Mínimo 6 caracteres
-          </mat-error>
-        </mat-form-field>
+          <mat-form-field 
+            class="anim-item custom-field" 
+            appearance="fill"
+            [@shake]="form.errors?.['invalid'] ? 'error' : 'void'">
+            <mat-label class="field-label">Contraseña</mat-label>
+            <input 
+              matInput 
+              [type]="hide ? 'password' : 'text'" 
+              formControlName="password"
+              class="field-input"
+              placeholder="••••••••">
+            <mat-icon matPrefix class="field-icon">lock</mat-icon>
+            <button 
+              mat-icon-button 
+              matSuffix 
+              type="button" 
+              (click)="hide = !hide"
+              class="toggle-password">
+              <mat-icon>{{ hide ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="password?.errors?.['required']">
+              <mat-icon>error</mat-icon> La contraseña es obligatoria
+            </mat-error>
+            <mat-error *ngIf="password?.errors?.['minlength']">
+              <mat-icon>warning</mat-icon> Mínimo 6 caracteres
+            </mat-error>
+          </mat-form-field>
 
-        <!-- Botón de Login -->
+        </div> 
         <button 
           class="anim-item login-btn"
           mat-raised-button 
@@ -124,24 +103,18 @@
           </span>
         </button>
 
-        <!-- Links -->
         <div class="card-links anim-item">
-          <a routerLink="/forgot-password" class="link-item">
-            <mat-icon class="link-icon">help</mat-icon>
-            ¿Olvidaste tu contraseña?
-          </a>
-          <span class="link-separator">•</span>
           <a routerLink="/register" class="link-item">
             <mat-icon class="link-icon">person_add</mat-icon>
             Registrarse
           </a>
         </div>
+
       </form>
     </mat-card-content>
   </mat-card>
 </main>
 
-<!-- Footer lunar -->
 <footer class="lunar-footer">
   <div class="moon-phase">
     <span class="phase-icon">🌕</span>
