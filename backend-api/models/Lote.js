@@ -1,34 +1,26 @@
 const mongoose = require('mongoose');
 
 const loteSchema = new mongoose.Schema({
-  nombre: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  // Relación con el usuario dueño del lote
-  usuario: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true // Asumo que tienes autenticación lista
-  },
-  // Relación con el catálogo de cultivos (Maíz, Tomate, etc.)
-  cultivo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Cultivo',
-    required: true
-  },
-  fechaSiembra: {
-    type: Date,
-    default: Date.now
-  },
-  area: {
-    type: Number, // En metros cuadrados o hectáreas
-    default: 0
-  },
+  // ... (tus campos existentes: nombre, usuario, cultivo, etc.)
+  nombre: { type: String, required: true, trim: true },
+  usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  cultivo: { type: mongoose.Schema.Types.ObjectId, ref: 'Cultivo', required: true },
+  
   ubicacion: {
-    lat: Number,
-    lon: Number
+    lat: { type: Number, required: true },
+    lon: { type: Number, required: true },
+    provincia: { type: String, default: '' } // Nuevo campo útil para filtros
+  },
+
+  // ✅ NUEVA SECCIÓN: Configuración de Alertas
+  alertasClima: {
+    activas: { type: Boolean, default: false },
+    frecuencia: { 
+      type: String, 
+      enum: ['diaria', 'semanal', 'critica'], // 'critica' = solo si hay heladas/sequía
+      default: 'semanal' 
+    },
+    emailNotificacion: { type: String } // Opcional, por si quiere recibir en otro correo
   },
   // El semáforo de salud
   estadoSalud: {

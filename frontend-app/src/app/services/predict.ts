@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators'; // <--- 1. IMPORTANTE: Añadir esto
 import { environment } from '../../environments/environment.development';
 import { AuthService } from './auth';
 import { WebsocketService } from './websocket';
@@ -33,16 +34,18 @@ export class PredictService {
     private authService: AuthService,
     private websocket: WebsocketService
   ) {
-    // Escuchar resultados de WebSocket
+    // El WebSocket se queda como RESPALDO.
+    // Si por alguna razón la HTTP falla pero el socket llega, esto actualizará la UI.
     this.websocket.listen<PredictionResult>('prediction_result').subscribe(prediction => {
+      console.log('⚡ WebSocket backup: Actualizando predicción');
       this.loadingSubject.next(false);
       this.currentPredictionSubject.next(prediction);
     });
   }
 
-  uploadImage(file: File, crop: string): Observable<any> {
+  uploadImage(file: File, crop: string): Observable<PredictionResult> {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     formData.append('crop', crop);
 
     const token = this.authService.getToken();
@@ -50,8 +53,22 @@ export class PredictService {
       'Authorization': `Bearer ${token}`
     });
 
-    this.loadingSubject.next(true); // Activar estado de carga
-    return this.http.post(`${this.apiUrl}/upload`, formData, { headers });
+    this.loadingSubject.next(true); // Activar Spinner
+
+    // --- 2. AQUÍ ESTÁ LA CORRECCIÓN ---
+    return this.http.post<PredictionResult>(`${this.apiUrl}/upload`, formData, { headers }).pipe(
+      tap({
+        next: (response) => {
+          console.log('✅ HTTP Rápido: Predicción recibida');
+          this.loadingSubject.next(false);       // Apagar Spinner inmediatamente
+          this.currentPredictionSubject.next(response); // Mostrar resultado
+        },
+        error: (error) => {
+          console.error('❌ Error HTTP:', error);
+          this.loadingSubject.next(false); // Apagar Spinner si falla
+        }
+      })
+    );
   }
 
   getPredictionById(id: string): Observable<PredictionResult> {

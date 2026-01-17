@@ -17,7 +17,7 @@
 
 ---
 
-## 🏗️ Estructura del Proyecto
+## 🏗️ Estructura Completa del Proyecto
 
 ### Carpetas Principales
 
@@ -41,63 +41,466 @@ PlantDiseaseDetector_V2/
 - Socket.IO para WebSockets
 - Multer para carga de archivos
 - node-cron para trabajos programados
+- bcrypt para encriptación de contraseñas
 
-### Estructura de Carpetas
+### Estructura Completa
 
 ```
 backend-api/
 ├── config/
-│   └── db.js                    # Configuración de MongoDB
+│   └── db.js                        # Configuración y conexión MongoDB
+│
 ├── controllers/
-│   ├── authController.js        # Control de autenticación
-│   ├── climateController.js     # Control de datos climáticos
-│   ├── loteController.js        # CRUD de lotes/parcelas
-│   └── predictionController.js  # Control de predicciones de IA
+│   ├── authController.js            # Autenticación: login, registro, validación JWT
+│   ├── climateController.js         # Datos climáticos: obtener, procesar
+│   ├── dashboardController.js       # Datos para dashboard: resúmenes, estadísticas
+│   ├── loteController.js            # CRUD lotes: crear, leer, actualizar, eliminar
+│   ├── mapController.js             # Gestión de mapas e ubicaciones
+│   ├── predictionController.js      # Predicciones de IA: enviar a servicio Python
+│   ├── recommendationController.js  # Recomendaciones agrícolas
+│   └── taskController.js            # Tareas: crear, asignar, completar
+│
 ├── middleware/
-│   ├── authMiddleware.js        # Validación de JWT
-│   └── uploadMiddleware.js      # Gestión de carga de archivos
+│   ├── authMiddleware.js            # Verificación de JWT en rutas protegidas
+│   ├── uploadMiddleware.js          # Configuración Multer para carga de imágenes
+│   └── validators.js                # Validación de datos de entrada
+│
 ├── models/
-│   ├── User.js                  # Esquema de Usuario
-│   ├── Lote.js                  # Esquema de Lote/Parcela
-│   ├── Cultivo.js               # Esquema de Cultivo
-│   └── Prediction.js            # Esquema de Predicciones
+│   ├── User.js                      # Esquema Usuario (username, email, password)
+│   ├── Lote.js                      # Esquema Lote (cultivo, ubicación, historial)
+│   ├── Cultivo.js                   # Esquema Cultivo (Banano, Café, propiedades)
+│   ├── Prediction.js                # Esquema Predicción (resultado IA, confianza)
+│   ├── Task.js                      # Esquema Tarea (asignaciones, estado)
+│   └── Bulletin.js                  # Esquema Boletín (alertas, recomendaciones)
+│
 ├── routes/
-│   ├── auth.js                  # Rutas de autenticación
-│   ├── climate.js               # Rutas de clima
-│   ├── lotes.js                 # Rutas de lotes
-│   └── predict.js               # Rutas de predicciones
+│   ├── api.js                       # Rutas principales/agregadas
+│   ├── auth.js                      # POST /login, /register, /verify
+│   ├── climate.js                   # GET/POST datos climáticos
+│   ├── dashboard.js                 # GET estadísticas, resúmenes
+│   ├── lotes.js                     # CRUD lotes (GET, POST, PUT, DELETE)
+│   ├── predict.js                   # POST predicción de enfermedad
+│   └── tasks.js                     # CRUD tareas
+│
 ├── services/
-│   └── matchingEngine.js        # Motor de coincidencia de datos
+│   └── matchingEngine.js            # Motor de coincidencia: datos clima vs cultivos
+│
 ├── jobs/
-│   └── recomendacionJob.js      # Job programado de recomendaciones
+│   └── recomendacionJob.js          # Job cron: genera recomendaciones periódicas
+│
 ├── scripts/
-│   └── seedCultivos.js          # Script para cargar cultivos iniciales
-├── server.js                    # Archivo principal del servidor
-├── package.json
-└── test_env.js
-```
+│   └── seedCultivos.js              # Script para cargar cultivos iniciales
+│
+├── uploads/                         # Carpeta para imágenes cargadas
+│   ├── img-*.avif                   # Imágenes de plantas convertidas a AVIF
+│   └── ...
+│
+├── server.js                        # Archivo principal - inicializa Express, MongoDB, Socket.IO
+├── package.json                     # Dependencias Node.js
+├── .env                             # Variables de entorno (Puerto, BD, secretos)
+└── test_env.js                      # Script de prueba de conexión
 
-### Modelos de Base de Datos
+### Modelos de Base de Datos (MongoDB)
 
 #### User
-- username (único)
-- email (único)
-- password (encriptada con bcrypt)
-- Timestamps
+```
+{
+  _id: ObjectId
+  username: String (único)
+  email: String (único)
+  password: String (bcrypt)
+  rol: String (admin, usuario)
+  activo: Boolean
+  createdAt: Date
+  updatedAt: Date
+}
+```
 
 #### Lote
-- nombre
-- usuario (referencia a User)
-- cultivo (referencia a Cultivo)
-- fechaSiembra
-- area (en m² o hectáreas)
-- ubicacion (lat/lon)
-- estadoSalud (saludable, riesgo, peligro)
-- historial (registro de eventos: riego, fertilizante, plagas, etc.)
+```
+{
+  _id: ObjectId
+  nombre: String
+  usuario: ObjectId (referencia User)
+  cultivo: ObjectId (referencia Cultivo)
+  fechaSiembra: Date
+  area: Number (hectáreas/m²)
+  ubicacion: {
+    tipo: Point
+    coordenadas: [Long, Lat]
+  }
+  estadoSalud: String (saludable|riesgo|peligro)
+  historial: Array[
+    {
+      tipo: String (riego|fertilizante|plaga|enfermedad)
+      fecha: Date
+      descripcion: String
+    }
+  ]
+  createdAt: Date
+  updatedAt: Date
+}
+```
 
 #### Cultivo
-- Banano
-- Café
+```
+{
+  _id: ObjectId
+  nombre: String (Banano|Café)
+  descripcion: String
+  enfermedadesComunes: Array[String]
+  condicionesOptimas: Object
+  createdAt: Date
+}
+```
+
+#### Prediction
+```
+{
+  _id: ObjectId
+  lote: ObjectId (referencia Lote)
+  usuario: ObjectId (referencia User)
+  imagen: String (ruta archivo)
+  enfermedad: String (resultado IA)
+  confianza: Number (0-100%)
+  tratamiento: String
+  createdAt: Date
+}
+```
+
+#### Task
+```
+{
+  _id: ObjectId
+  lote: ObjectId (referencia Lote)
+  usuario: ObjectId (referencia User)
+  titulo: String
+  descripcion: String
+  estado: String (pendiente|en_progreso|completada)
+  fechaVencimiento: Date
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+#### Bulletin
+```
+{
+  _id: ObjectId
+  titulo: String
+  contenido: String
+  tipo: String (alerta|recomendacion|informacion)
+  cultivos: Array[ObjectId]
+  fechaPublicacion: Date
+}
+```
+
+---
+
+## 🎨 Frontend App (Angular 20)
+
+### Ubicación: `/frontend-app`
+
+**Tecnologías:**
+- Angular 20 (standalone components)
+- Angular Material Design
+- TypeScript
+- RxJS para manejo reactivo
+- Leaflet para mapas
+- Socket.IO Client para comunicación en tiempo real
+- ngx-toastr para notificaciones
+- SCSS para estilos
+
+### Estructura Completa
+
+```
+frontend-app/
+├── src/
+│   ├── app/
+│   │   │
+│   │   ├── components/
+│   │   │   ├── login/                      # Componente de login
+│   │   │   │   ├── login.ts               # Lógica autenticación
+│   │   │   │   ├── login.html             # Interfaz formulario
+│   │   │   │   └── login.css              # Estilos
+│   │   │   │
+│   │   │   ├── register/                   # Componente de registro
+│   │   │   │   ├── register.ts
+│   │   │   │   ├── register.html
+│   │   │   │   └── register.css
+│   │   │   │
+│   │   │   ├── main-layout/                # Layout principal con navbar
+│   │   │   │   ├── main-layout.ts         # Componente principal
+│   │   │   │   ├── main-layout.html
+│   │   │   │   └── main-layout.css
+│   │   │   │
+│   │   │   ├── dashboard/                  # Panel de control
+│   │   │   │   ├── dashboard.ts           # Estadísticas, resumen cultivos
+│   │   │   │   ├── dashboard.html
+│   │   │   │   └── dashboard.css
+│   │   │   │
+│   │   │   ├── finca/                      # Gestión de lotes/parcelas
+│   │   │   │   ├── finca.ts               # CRUD lotes, visualización
+│   │   │   │   ├── finca.html
+│   │   │   │   └── finca.css
+│   │   │   │
+│   │   │   ├── detection/                  # Detección de enfermedades
+│   │   │   │   ├── detection.ts           # Carga imagen, llama IA
+│   │   │   │   ├── detection.html
+│   │   │   │   └── detection.css
+│   │   │   │
+│   │   │   ├── result/                     # Resultado de predicción
+│   │   │   │   ├── result.ts              # Muestra enfermedad, confianza, tratamiento
+│   │   │   │   ├── result.html
+│   │   │   │   └── result.css
+│   │   │   │
+│   │   │   ├── recomendacion/              # Recomendaciones individuales
+│   │   │   │   ├── recomendacion.ts
+│   │   │   │   ├── recomendacion.html
+│   │   │   │   └── recomendacion.css
+│   │   │   │
+│   │   │   ├── recomendaciones/            # Lista de recomendaciones
+│   │   │   │   ├── recomendaciones.ts
+│   │   │   │   ├── recomendaciones.html
+│   │   │   │   └── recomendaciones.css
+│   │   │   │
+│   │   │   ├── tareas/                     # Gestión de tareas
+│   │   │   │   ├── tareas.ts              # CRUD tareas, asignación
+│   │   │   │   ├── tareas.html
+│   │   │   │   └── tareas.css
+│   │   │   │
+│   │   │   ├── boletin/                    # Boletín informativo
+│   │   │   │   ├── boletin.ts             # Alertas y notificaciones
+│   │   │   │   ├── boletin.html
+│   │   │   │   └── boletin.css
+│   │   │   │
+│   │   │   ├── biblioteca/                 # Biblioteca de información
+│   │   │   │   ├── biblioteca.ts          # Recursos, artículos
+│   │   │   │   ├── biblioteca.html
+│   │   │   │   └── biblioteca.css
+│   │   │   │
+│   │   │   ├── map-selector/               # Selector de ubicación en mapa
+│   │   │   │   ├── map-selector.ts        # Leaflet, búsqueda ubicación
+│   │   │   │   ├── map-selector.html
+│   │   │   │   └── map-selector.css
+│   │   │   │
+│   │   │   └── lunar-calendar/             # Calendario lunar
+│   │   │       ├── lunar-calendar.ts      # Ciclos lunares, recomendaciones
+│   │   │       ├── lunar-calendar.html
+│   │   │       └── lunar-calendar.css
+│   │   │
+│   │   ├── services/
+│   │   │   ├── auth.ts                     # Autenticación: login, registro, logout
+│   │   │   ├── auth.spec.ts               # Tests autenticación
+│   │   │   ├── predict.ts                 # Predicción: envía imagen a backend
+│   │   │   ├── predict.spec.ts            # Tests predicción
+│   │   │   ├── finca.service.ts           # CRUD lotes, consulta información
+│   │   │   ├── climate.ts                 # Datos climáticos en tiempo real
+│   │   │   ├── websocket.ts               # Conexión WebSocket con backend
+│   │   │   ├── websocket.spec.ts
+│   │   │   ├── theme.ts                   # Gestión de temas (claro/oscuro)
+│   │   │   └── toast.ts                   # Notificaciones en pantalla
+│   │   │
+│   │   ├── guards/
+│   │   │   ├── auth-guard.ts              # Protege rutas, verifica JWT
+│   │   │   └── auth-guard.spec.ts
+│   │   │
+│   │   ├── interceptors/
+│   │   │   └── auth.interceptor.ts        # Agrega token JWT a peticiones HTTP
+│   │   │
+│   │   ├── animations/
+│   │   │   └── auth-animations.ts         # Animaciones para transiciones
+│   │   │
+│   │   ├── app.ts                         # Componente raíz
+│   │   ├── app.html
+│   │   ├── app.css
+│   │   ├── app.spec.ts
+│   │   ├── app.routes.ts                  # Rutas principales (sin módulos)
+│   │   ├── app.routes.server.ts
+│   │   ├── app.config.ts                  # Configuración de providers
+│   │   ├── app.config.server.ts
+│   │   │
+│   ├── environments/
+│   │   └── environment.development.ts     # URLs API, configuración desarrollo
+│   │
+│   ├── index.html                         # HTML raíz
+│   ├── main.ts                            # Bootstrap de la aplicación
+│   ├── main.server.ts
+│   ├── server.ts
+│   ├── styles.scss                        # Estilos globales
+│   └── custom-theme.scss                  # Tema Material Design personalizado
+│
+├── public/                                # Recursos estáticos
+├── angular.json                           # Configuración Angular CLI
+├── tsconfig.json                          # Configuración TypeScript
+├── tsconfig.app.json
+├── tsconfig.spec.json
+└── package.json
+
+### Componentes Detallados
+
+| Componente | Funcionalidad |
+|-----------|--------------|
+| **login** | Autenticación de usuarios con email/contraseña |
+| **register** | Registro de nuevos usuarios |
+| **main-layout** | Navbar, sidebar, estructura general de la app |
+| **dashboard** | Resumen de cultivos, estadísticas de salud |
+| **finca** | Listado y gestión de lotes/parcelas |
+| **detection** | Carga de imagen para detección de enfermedad |
+| **result** | Muestra resultado de predicción, confianza, tratamiento |
+| **recomendacion** | Recomendación agrícola individual |
+| **recomendaciones** | Listado de todas las recomendaciones |
+| **tareas** | CRUD de tareas, asignación a usuarios |
+| **boletin** | Boletín informativo con alertas |
+| **biblioteca** | Recursos educativos y artículos |
+| **map-selector** | Selector de ubicación con Leaflet |
+| **lunar-calendar** | Calendario lunar con recomendaciones |
+
+### Servicios Detallados
+
+| Servicio | Responsabilidad |
+|---------|-----------------|
+| **auth.ts** | Manejo de login, registro, logout, validación JWT |
+| **predict.ts** | Envía imagen a backend para predicción de IA |
+| **finca.service.ts** | CRUD lotes, consultas de información |
+| **climate.ts** | Obtiene datos climáticos en tiempo real |
+| **websocket.ts** | Conexión WebSocket para actualizaciones instantáneas |
+| **theme.ts** | Gestión de temas (claro/oscuro) |
+| **toast.ts** | Notificaciones tipo toast |
+
+---
+
+## 🐍 IA Service (Python Flask)
+
+### Ubicación: `/ia-service-python`
+
+**Tecnologías:**
+- Flask para API REST
+- Keras/TensorFlow para modelos de deep learning
+- OpenCV para procesamiento de imágenes
+- NumPy, Pandas para procesamiento de datos
+- scikit-learn para machine learning
+- Pickle para serialización de modelos
+
+### Estructura Completa
+
+```
+ia-service-python/
+│
+├── models/                              # Modelos entrenados
+│   ├── banana_leaf_disease_model.h5    # Modelo CNN para enfermedad Banano
+│   ├── coffee_leaf_disease_model.h5    # Modelo CNN para enfermedad Café
+│   └── arroz_modelo.pkl                # Modelo adicional Arroz (sklearn)
+│
+├── app.py                              # Aplicación principal Flask
+│                                       # Endpoints:
+│                                       # - POST /predict: predicción enfermedad
+│                                       # - POST /predict/banana: predicción Banano
+│                                       # - POST /predict/coffee: predicción Café
+│                                       # - GET /health: estado del servicio
+│
+├── requirements.txt                    # Dependencias Python
+│                                       # - Flask
+│                                       # - Keras/TensorFlow
+│                                       # - scikit-image
+│                                       # - Pillow
+│                                       # - numpy
+│                                       # - pandas
+│
+├── README.md                           # Documentación IA service
+└── [archivos de entrenamiento]         # Scripts para entrenar modelos (si existen)
+
+### Modelos de IA
+
+#### banana_leaf_disease_model.h5
+- Arquitectura: CNN (Convolutional Neural Network)
+- Input: Imagen 224x224x3
+- Output: Clases de enfermedades del Banano
+- Framework: Keras/TensorFlow
+
+#### coffee_leaf_disease_model.h5
+- Arquitectura: CNN (Convolutional Neural Network)
+- Input: Imagen 224x224x3
+- Output: Clases de enfermedades del Café
+- Framework: Keras/TensorFlow
+
+#### arroz_modelo.pkl
+- Modelo scikit-learn alternativo
+- Formato: Pickle
+- Uso: Predicción para cultivo de Arroz
+
+### Flujo de Predicción
+
+```
+1. Frontend carga imagen
+2. Backend recibe imagen, la procesa
+3. Backend envía imagen a IA Service (/predict)
+4. IA Service carga modelo correspondiente
+5. Preprocessa imagen: redimensiona, normaliza
+6. Ejecuta modelo: obtiene predicciones
+7. Retorna: enfermedad, confianza (%), clases
+8. Backend procesa resultado, guarda en BD
+9. Frontend muestra resultado al usuario
+```
+
+---
+
+## 🔄 Comunicación entre Servicios
+
+### Frontend → Backend
+- HTTP REST API (HTTPS en producción)
+- Autenticación: JWT en headers
+- WebSocket para actualizaciones en tiempo real
+
+### Backend → IA Service Python
+- HTTP POST a `localhost:5000/predict`
+- Envía imagen en multipart/form-data
+- Recibe JSON con predicción
+
+### Base de Datos (MongoDB)
+- Almacena Usuarios, Lotes, Predicciones, Tareas
+- Backend realiza CRUD operations
+- Índices en usuario, lote, cultivo para búsquedas rápidas
+
+---
+
+## 📦 Dependencias Principales
+
+### Backend (Node.js)
+```json
+{
+  "express": "^5.1.0",
+  "mongoose": "^8.20.0",
+  "jsonwebtoken": "para JWT",
+  "bcryptjs": "para encriptación",
+  "multer": "para carga de archivos",
+  "socket.io": "para WebSockets",
+  "node-cron": "para jobs programados"
+}
+```
+
+### Frontend (Angular)
+```json
+{
+  "@angular/core": "^20.0.0",
+  "@angular/material": "Material Design",
+  "leaflet": "para mapas",
+  "socket.io-client": "WebSocket cliente",
+  "rxjs": "programación reactiva",
+  "typescript": "^5.x"
+}
+```
+
+### IA Service (Python)
+```
+Flask
+Keras/TensorFlow
+scikit-learn
+OpenCV
+Pillow
+NumPy
+Pandas
+```
 - (Extensible)
 
 #### Prediction

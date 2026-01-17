@@ -1,116 +1,180 @@
 import { Component, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ClimateService, Recomendacion } from '../../services/climate'; // Asegúrate que la ruta sea correcta
-// NO importamos Leaflet aquí arriba estáticamente para evitar error SSR
+import { FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select'; // Para el filtro
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { LoteDialogComponent } from '../lote-dialog/lote-dialog';
+import { LoteService } from '../../services/lote.service';
+import { ToastrService } from 'ngx-toastr';
+// Importa tu servicio de clima existente
+import { ClimateService, Recomendacion } from '../../services/climate'; 
+
+// 📍 Datos Geográficos para el Filtro
+const PROVINCIAS = [
+  { nombre: 'Azuay', lat: -2.9001, lon: -79.0059 },
+  { nombre: 'Pichincha', lat: -0.2299, lon: -78.5249 },
+  { nombre: 'Guayas', lat: -2.1962, lon: -79.8862 },
+  { nombre: 'Manabí', lat: -1.0546, lon: -80.4544 },
+  { nombre: 'Loja', lat: -3.9931, lon: -79.2042 },
+  { nombre: 'Tungurahua', lat: -1.2491, lon: -78.6168 },
+  { nombre: 'Imbabura', lat: 0.3517, lon: -78.1223 }
+];
 
 @Component({
   selector: 'app-map-selector',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './map-selector.html',
+  imports: [CommonModule, FormsModule, MatSelectModule, MatDialogModule],
+  templateUrl: './map-selector.html', // Usaremos tu HTML modificado abajo
   styleUrls: ['./map-selector.css']
 })
 export class MapSelectorComponent implements AfterViewInit {
 
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
 
-  private map: any; // Tipo any porque Leaflet se carga dinámicamente
+  private map: any;
   private marker: any;
   private isBrowser: boolean;
 
+  // Variables para Filtro y Mapa
+  provincias = PROVINCIAS;
+  provinciaSeleccionada: any = null;
+
+  // Variables existentes (Tu código)
   selectedLat: number | null = null;
   selectedLon: number | null = null;
-
   recomendaciones: Recomendacion[] = [];
   loading = false;
   error: string | null = null;
 
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
-    private climateService: ClimateService
+    private dialog: MatDialog,
+    private loteService: LoteService,
+    private climateService: ClimateService,
+    private toastr: ToastrService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
 
   async ngAfterViewInit() {
     if (this.isBrowser) {
-      // 1. Carga dinámica de Leaflet (Soluciona error SSR/Hydration)
       const L = await import('leaflet');
-
-      // 2. Solución a los iconos perdidos (Error 404)
+      
+      // Fix iconos Leaflet (Tu código)
       const DefaultIcon = L.icon({
         iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
         iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
+        iconAnchor: [12, 41]
       });
       L.Marker.prototype.options.icon = DefaultIcon;
 
-      // 3. Inicializar Mapa
       this.initMap(L);
     }
   }
 
   private initMap(L: any): void {
-    // Centro inicial (Cevallos)
-    const initialLat = -1.24;
-    const initialLon = -78.62;
-
-    this.map = L.map(this.mapContainer.nativeElement).setView([initialLat, initialLon], 10);
+    // Centro inicial (Ecuador)
+    this.map = L.map(this.mapContainer.nativeElement).setView([-1.8312, -78.1834], 7);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '© OpenStreetMap contributors'
+      attribution: '© OpenStreetMap'
     }).addTo(this.map);
 
+    // 🎯 EVENTO CLIC PRINCIPAL
     this.map.on('click', (event: any) => {
       const { lat, lng } = event.latlng;
-
+      
+      // 1. Actualizar visualmente (Tu código)
       this.selectedLat = lat;
       this.selectedLon = lng;
-
+      
       if (this.marker) {
         this.marker.setLatLng([lat, lng]);
       } else {
         this.marker = L.marker([lat, lng]).addTo(this.map);
       }
+
+      // 2. ABRIR DIALOGO DE REGISTRO
+      this.abrirDialogoRegistro(lat, lng);
     });
   }
 
-  obtenerRecomendaciones() {
-    if (this.selectedLat == null || this.selectedLon == null) {
-      this.error = 'Selecciona un punto en el mapa primero.';
-      return;
+  // 🚀 Lógica del Filtro de Provincias
+  irAProvincia() {
+    if (this.provinciaSeleccionada && this.map) {
+      this.map.flyTo(
+        [this.provinciaSeleccionada.lat, this.provinciaSeleccionada.lon], 
+        10, // Zoom más cercano
+        { duration: 1.5 } // Animación suave
+      );
     }
+  }
+
+  // 🚀 Lógica del Formulario Emergente
+  abrirDialogoRegistro(lat: number, lon: number) {
+    const dialogRef = this.dialog.open(LoteDialogComponent, {
+      width: '450px',
+      data: { lat, lon },
+      disableClose: true // Obliga a usar botones
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Usuario dio clic en "Guardar Finca"
+        this.guardarFinca(result, lat, lon);
+      } else {
+        // Usuario canceló, pero mantenemos coordenadas para "Consultar Clima" solamente
+        this.toastr.info('Modo consulta activado. Puedes ver recomendaciones abajo.', 'Finca no guardada');
+      }
+    });
+  }
+
+  guardarFinca(formData: any, lat: number, lon: number) {
+    const payload = {
+      ...formData,
+      lat,
+      lon
+    };
+
+    this.loading = true;
+    this.loteService.crearLote(payload).subscribe({
+      next: (res) => {
+        this.toastr.success('Hacienda registrada y alertas configuradas', '¡Éxito!');
+        this.loading = false;
+        // Opcional: Llamar a obtenerRecomendaciones automáticamente
+        this.obtenerRecomendaciones();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Error al guardar la finca', 'Error');
+        this.loading = false;
+      }
+    });
+  }
+
+  // TU MÉTODO EXISTENTE (Se mantiene igual, para consultas manuales)
+  obtenerRecomendaciones() {
+    if (this.selectedLat == null || this.selectedLon == null) return;
 
     this.loading = true;
     this.error = null;
     this.recomendaciones = [];
-
     const cultivo = 'Maíz'; 
 
-    // Asegúrate que tu servicio tenga el método 'obtenerRecomendacion' o 'getRecomendacion'
-    // Aquí uso 'obtenerRecomendacion' basado en el contexto anterior
     this.climateService.obtenerRecomendacion(cultivo, this.selectedLat, this.selectedLon)
       .subscribe({
         next: (res: any) => {
-          console.log('Respuesta API:', res);
-          
-          // 4. CORRECCIÓN DE DATOS: Usar la estructura correcta del JSON
           if (res.success && res.data && res.data.topRecomendaciones) {
             this.recomendaciones = res.data.topRecomendaciones;
           } else {
-             // Fallback por si la estructura cambia
              this.error = 'No se encontraron recomendaciones válidas.';
           }
           this.loading = false;
         },
         error: (err) => {
-          console.error('Error HTTP:', err);
-          this.error = 'No se pudieron obtener recomendaciones. Revisa la consola.';
+          this.error = 'No se pudieron obtener recomendaciones.';
           this.loading = false;
         }
       });

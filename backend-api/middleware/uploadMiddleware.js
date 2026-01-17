@@ -22,21 +22,32 @@ const storage = multer.diskStorage({
 
 // 3. Filtro para aceptar solo imágenes
 function checkFileType(file, cb) {
-  const filetypes = /jpeg|jpg|png|gif/;
+  // Aceptamos jpeg, jpg, png, gif, webp, avif, bmp
+  const filetypes = /jpeg|jpg|png|gif|webp|avif|bmp/;
+  
+  // Verificamos extensión y mimetype
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = filetypes.test(file.mimetype);
+
+  // --- DEBUG: ESTO SALDRÁ EN TU CONSOLA ---
+  console.log('📂 Procesando archivo:', file.originalname);
+  console.log('   Tipo detectado:', file.mimetype);
+  console.log('   Extensión:', path.extname(file.originalname));
+  // ----------------------------------------
 
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb(new Error('Error: ¡Solo se permiten imágenes!'));
+    // Si falla, veremos por qué en la consola
+    console.error('❌ Archivo rechazado por filtro');
+    cb(new Error('Error: ¡Solo se permiten imágenes (jpg, png, gif, webp, avif)!'));
   }
 }
 
-// 4. Inicializar 'multer' con la configuración
+// 4. Inicializar 'multer'
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10000000 }, // Límite de 10MB
+  limits: { fileSize: 10000000 }, // 10MB
   fileFilter: (req, file, cb) => {
     checkFileType(file, cb);
   }

@@ -1,24 +1,38 @@
 <div class="map-page">
 
-  <h2>🌍 Selecciona tu Finca en el Mapa</h2>
-  <p class="subtitle">
-    Haz clic sobre el mapa para marcar tu finca y obtener recomendaciones de
-    siembra basadas en el clima real de esa ubicación.
-  </p>
+  <div class="map-header">
+    <div class="title-section">
+      <h2>🌍 Gestión de Fincas y Clima</h2>
+      <p class="subtitle">Selecciona una ubicación para registrar tu finca o consultar el clima.</p>
+    </div>
 
-  <div #mapContainer class="leaflet-map-container" style="height: 400px; width: 100%; z-index: 1;"></div>
+    <div class="filter-section">
+      <mat-form-field appearance="outline" class="province-select">
+        <mat-label>📍 Ir a Provincia</mat-label>
+        <mat-select [(ngModel)]="provinciaSeleccionada" (selectionChange)="irAProvincia()">
+          <mat-option *ngFor="let p of provincias" [value]="p">
+            {{ p.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div #mapContainer class="leaflet-map-container"></div>
 
   <div class="coords-panel" *ngIf="selectedLat !== null && selectedLon !== null">
-    <p><strong>Latitud:</strong> {{ selectedLat | number:'1.4-4' }}</p>
-    <p><strong>Longitud:</strong> {{ selectedLon | number:'1.4-4' }}</p>
+    <div class="coords-info">
+      <p><strong>Ubicación Seleccionada:</strong></p>
+      <p>Lat: {{ selectedLat | number:'1.4-4' }} | Lon: {{ selectedLon | number:'1.4-4' }}</p>
+    </div>
 
-    <button (click)="obtenerRecomendaciones()" [disabled]="loading">
-      {{ loading ? 'Consultando...' : 'Obtener recomendaciones para este punto' }}
+    <button class="btn-consultar" (click)="obtenerRecomendaciones()" [disabled]="loading">
+      {{ loading ? 'Analizando...' : '📊 Ver Análisis de Suelo y Clima (Sin Guardar)' }}
     </button>
   </div>
 
   <div *ngIf="loading" class="loading">
-    <span class="spinner">🔄</span> Analizando clima y suelo...
+    <span class="spinner">🔄</span> Conectando con satélite y base de datos...
   </div>
 
   <div *ngIf="error" class="error-msg">
@@ -26,6 +40,7 @@
   </div>
 
   <div *ngIf="recomendaciones.length > 0" class="results-container">
+      <h3 class="results-title">📅 Calendario de Siembra Sugerido</h3>
       <div *ngFor="let rec of recomendaciones" class="rec-card">
         <div class="rec-header">
           <h3>{{ rec.fechaFormateada || (rec.fecha | date:'fullDate') }}</h3>
