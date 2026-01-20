@@ -1,36 +1,112 @@
-<div class="page">
-  <h2>Agenda de Tareas</h2>
-  <p class="sub">Planificación operativa con sincronización lunar 🌙</p>
+<div class="page-container p-4 md:p-8">
+  
+  <header class="flex flex-col md:flex-row justify-content-between align-items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-2">
+        📅 Agenda Agrícola
+      </h1>
+      <p class="text-slate-500 mt-1">Planifica tus siembras, riegos y cosechas.</p>
+    </div>
 
-  <!-- FORMULARIO -->
-  <div class="form">
-    <input placeholder="Título" [(ngModel)]="titulo" />
-    <select [(ngModel)]="tipo">
-      <option *ngFor="let t of tipos">{{ t }}</option>
-    </select>
-    <input type="date" [(ngModel)]="fecha" />
-    <button (click)="crearTarea()">Agregar</button>
-  </div>
+    <div class="bg-white p-2 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
+      <span class="text-xs font-bold text-slate-400 uppercase px-2">Filtrar:</span>
+      <select 
+        [(ngModel)]="selectedLoteFilter" 
+        (change)="cargarTareas()" 
+        class="bg-slate-50 border-none text-slate-700 font-medium focus:ring-0 cursor-pointer rounded-md py-1">
+        <option value="todos">Todas las fincas</option>
+        <option *ngFor="let lote of lotes()" [value]="lote._id">{{ lote.nombre }}</option>
+      </select>
+    </div>
+  </header>
 
-  <div class="header">
-    <button (click)="mesAnterior()">◀</button>
-    <h3>{{ nombreMes() }}</h3>
-    <button (click)="mesSiguiente()">▶</button>
-  </div>
-
-
-  <!-- CALENDARIO -->
-  <div class="calendar">
-    <div class="day" *ngFor="let d of diasDelMes()">
-      <div class="day-header">
-        <span>{{ d }}</span>
-        <span class="moon">{{ faseLunar(d) }}</span>
+  <section class="bg-white rounded-xl shadow-lg border border-slate-100 p-6 mb-8 transition-all hover:shadow-xl">
+    <h3 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
+      <span class="bg-green-100 text-green-700 p-1 rounded">➕</span> Nueva Tarea
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+      <div class="md:col-span-4">
+        <label class="label-text">Actividad</label>
+        <input [(ngModel)]="titulo" placeholder="Ej: Fertilización Lote Sur" class="input-field"/>
+      </div>
+      
+      <div class="md:col-span-2">
+        <label class="label-text">Tipo</label>
+        <select [(ngModel)]="tipo" class="input-field cursor-pointer">
+          <option *ngFor="let t of tipos">{{ t }}</option>
+        </select>
       </div>
 
-      <div class="task" *ngFor="let t of tareasDelDia(d)">
-        <input type="checkbox" [(ngModel)]="t.completada" />
-        <span [class.done]="t.completada">{{ t.titulo }} ({{ t.tipo }})</span>
+      <div class="md:col-span-3">
+        <label class="label-text">Finca / Lote</label>
+        <select [(ngModel)]="selectedLoteForm" class="input-field cursor-pointer">
+          <option value="">-- General --</option>
+          <option *ngFor="let lote of lotes()" [value]="lote._id">{{ lote.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="label-text">Fecha</label>
+        <input type="date" [(ngModel)]="fecha" class="input-field"/>
+      </div>
+
+      <div class="md:col-span-1">
+        <button (click)="crearTarea()" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-transform active:scale-95 flex justify-center items-center">
+          Add
+        </button>
       </div>
     </div>
+  </section>
+
+  <div class="flex justify-between items-center mb-4 bg-slate-800 text-white p-4 rounded-t-xl shadow-md mx-1">
+    <button (click)="cambiarMes(-1)" class="hover:bg-slate-700 p-2 rounded-full transition-colors">
+      ◀ Anterior
+    </button>
+    <h2 class="text-xl font-bold uppercase tracking-widest">{{ nombreMes() }}</h2>
+    <button (click)="cambiarMes(1)" class="hover:bg-slate-700 p-2 rounded-full transition-colors">
+      Siguiente ▶
+    </button>
   </div>
+
+  <div class="calendar-wrapper shadow-lg rounded-b-xl overflow-hidden border border-t-0 border-slate-200 mx-1">
+    
+    <div class="grid grid-cols-7 bg-slate-100 border-b border-slate-200">
+      <div *ngFor="let dia of diasSemana" class="py-3 text-center text-xs font-bold text-slate-500 uppercase">
+        {{ dia }}
+      </div>
+    </div>
+
+    <div class="calendar-grid bg-slate-200 gap-px">
+      
+      <div *ngFor="let vacio of espaciosVacios()" class="calendar-cell empty"></div>
+
+      <div *ngFor="let d of diasDelMes()" class="calendar-cell">
+        <div class="day-number">
+          <span [class.text-green-600]="d === hoy.getDate() && mes === hoy.getMonth()" 
+                [class.bg-green-100]="d === hoy.getDate() && mes === hoy.getMonth()"
+                class="px-2 rounded-full">
+            {{ d }}
+          </span>
+          <span class="moon-icon" title="Fase Lunar">{{ faseLunar(d) }}</span>
+        </div>
+
+        <div class="flex flex-col gap-1 overflow-y-auto max-h-[120px]">
+          <div *ngFor="let t of tareasDelDia(d)" 
+               (click)="cambiarEstado(t, $event)"
+               [class]="getColorClase(t.tipo)"
+               [class.completed]="t.estado === 'Completada'"
+               class="task-chip border shadow-sm">
+            
+            <span class="truncate pr-2">{{ t.titulo }}</span>
+            
+            <span class="check-icon text-xs">✔</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>

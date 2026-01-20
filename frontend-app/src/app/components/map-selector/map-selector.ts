@@ -1,10 +1,12 @@
-import { Component, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID, OnInit } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID, OnInit, inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router'; // ✅ CAMBIO: Importar Router
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { LoteDialogComponent } from '../lote-dialog/lote-dialog'; // Ajusta la ruta si es necesario
+import { LoteDialogComponent } from '../lote-dialog/lote-dialog';
 import { LoteService } from '../../services/lote.service';
+import { TaskService } from '../../services/task.service'; // ✅ CAMBIO: Importar TaskService
 import { ToastrService } from 'ngx-toastr';
 import { ClimateService, Recomendacion } from '../../services/climate';
 
@@ -31,20 +33,24 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
 
   private map: any;
-  private marker: any; // Marcador temporal (selección)
-  private markersGroup: any; // Grupo de marcadores de fincas guardadas
+  private marker: any;
+  private markersGroup: any;
   private isBrowser: boolean;
+
+  // Inyección de dependencias moderna (puedes usar constructor también)
+  private taskService = inject(TaskService); // ✅ CAMBIO: Inyección TaskService
+  private router = inject(Router); // ✅ CAMBIO: Inyección Router
 
   // Variables Filtro y Mapa
   provincias = PROVINCIAS;
   provinciaSeleccionada: any = null;
 
-  // Variables Clima (Consulta manual)
+  // Variables Clima
   selectedLat: number | null = null;
   selectedLon: number | null = null;
   recomendaciones: Recomendacion[] = [];
   
-  // Variables Gestión de Lotes (NUEVO)
+  // Variables Gestión de Lotes
   misLotes: any[] = [];
   
   loading = false;
@@ -61,7 +67,6 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
-    // Cargar los lotes al iniciar el componente
     this.cargarMisLotes();
   }
 
@@ -69,7 +74,6 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
     if (this.isBrowser) {
       const L = await import('leaflet');
       
-      // Fix iconos Leaflet
       const DefaultIcon = L.icon({
         iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
@@ -83,7 +87,7 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
     }
   }
 
-  // --- LÓGICA DE GESTIÓN DE LOTES (NUEVA) ---
+  // --- LÓGICA DE GESTIÓN DE LOTES ---
 
   cargarMisLotes() {
     this.loading = true;
@@ -91,7 +95,6 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
       next: (res: any) => {
         this.misLotes = res.data || [];
         this.loading = false;
-        // Si el mapa ya cargó, pintamos los lotes guardados
         if (this.map) {
           this.pintarLotesEnMapa();
         }
@@ -108,31 +111,55 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
       this.loteService.eliminarLote(id).subscribe({
         next: () => {
           this.toastr.info('Finca eliminada correctamente');
-          this.cargarMisLotes(); // Recargar lista
+          this.cargarMisLotes();
         },
         error: () => this.toastr.error('No se pudo eliminar la finca')
       });
     }
   }
 
-  convertirEnTarea(lote: any, recomendacion: any) {
-    // Envia la recomendación al backend para convertirla en tarea pendiente
-    const data = {
+  // ✅ CAMBIO IMPORTANTE: Lógica corregida para crear Tarea en lugar de usar API antigua
+  convertirEnTarea(lote: any, recomendacion?: any) {
+    // 1. Determinar mensaje y tipo
+    const titulo = recomendacion 
+      ? `Tarea Sugerida: ${recomendacion.accionSugerida || 'Acción Requerida'}`
+      : `Riego Sugerido - ${lote.nombre}`;
+      
+    const notas = recomendacion 
+      ? `Recomendación basada en clima: ${recomendacion.mensaje}`
+      : 'Tarea generada automáticamente desde el asistente del mapa.';
+
+    // 2. Preparar objeto Tarea
+    const nuevaTarea = {
+      titulo: titulo,
+      tipo: 'Riego', // Puedes hacer lógica para cambiar esto según la recomendación
+      fechaProgramada: new Date().toISOString().split('T')[0], // Para hoy
       loteId: lote._id,
-      mensaje: recomendacion.mensaje,
-      accion: recomendacion.accionSugerida
+      notas: notas
     };
 
-    this.loteService.aceptarRecomendacion(data).subscribe({
+    this.loading = true;
+
+    // 3. Llamar al TaskService
+    this.taskService.createTask(nuevaTarea).subscribe({
       next: () => {
-        this.toastr.success('✅ Tarea creada en tu agenda', 'Recomendación Aceptada');
-        // Opcional: Podrías recargar los lotes para que la recomendación desaparezca o cambie de estado
+        this.loading = false;
+        this.toastr.success('✅ Tarea creada en tu agenda', 'Agenda Actualizada');
+        
+        // Opcional: Llevar al usuario a ver su agenda
+        if(confirm('Tarea creada. ¿Quieres ir a tu agenda ahora?')) {
+            this.router.navigate(['/tareas']);
+        }
       },
-      error: () => this.toastr.error('Error al crear la tarea')
+      error: (err) => {
+        this.loading = false;
+        console.error(err);
+        this.toastr.error('Error al crear la tarea automática', 'Error');
+      }
     });
   }
 
-  // --- LÓGICA DEL MAPA ---
+  // --- LÓGICA DEL MAPA (Sin cambios mayores) ---
 
   private async initMap(L: any) {
     this.map = L.map(this.mapContainer.nativeElement).setView([-1.8312, -78.1834], 7);
@@ -142,26 +169,20 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
       attribution: '© OpenStreetMap'
     }).addTo(this.map);
 
-    // Grupo para guardar los iconos de las fincas
     this.markersGroup = L.layerGroup().addTo(this.map);
-    
-    // Pintamos los lotes que cargamos en ngOnInit
     this.pintarLotesEnMapa();
 
-    // Evento Click para NUEVOS registros o consultas
     this.map.on('click', (event: any) => {
       const { lat, lng } = event.latlng;
       this.selectedLat = lat;
       this.selectedLon = lng;
       
-      // Mover marcador temporal (azul)
       if (this.marker) {
         this.marker.setLatLng([lat, lng]);
       } else {
         this.marker = L.marker([lat, lng]).addTo(this.map);
       }
 
-      // Abrir modal
       this.abrirDialogoRegistro(lat, lng);
     });
   }
@@ -170,9 +191,8 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
     if (!this.map || !this.markersGroup) return;
     
     const L = await import('leaflet');
-    this.markersGroup.clearLayers(); // Limpiar anteriores
+    this.markersGroup.clearLayers();
 
-    // Icono verde para fincas guardadas
     const FarmIcon = L.icon({
       iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -215,7 +235,7 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
         this.guardarFinca(result, lat, lon);
       } else {
         this.toastr.info('Modo consulta activado. Ver resultados abajo.', 'Sin Guardar');
-        this.obtenerRecomendacionesManuales(); // Solo ver clima
+        this.obtenerRecomendacionesManuales();
       }
     });
   }
@@ -235,11 +255,7 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
       next: (res) => {
         this.toastr.success('Finca registrada correctamente', '¡Éxito!');
         this.loading = false;
-        
-        // 1. Recargar lista de mis fincas
         this.cargarMisLotes();
-        
-        // 2. Obtener recomendaciones manuales del punto actual también
         this.obtenerRecomendacionesManuales();
       },
       error: (err) => {
@@ -251,10 +267,9 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
     });
   }
 
-  // --- LÓGICA DE CONSULTA MANUAL (CLIMA) ---
+  // --- LÓGICA DE CONSULTA MANUAL ---
   
   obtenerRecomendaciones() {
-    // Alias para compatibilidad con el HTML viejo, redirige a la manual
     this.obtenerRecomendacionesManuales();
   }
 
@@ -264,7 +279,7 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
     this.loading = true;
     this.error = null;
     this.recomendaciones = [];
-    const cultivo = 'Maíz'; // Default para consultas sin guardar
+    const cultivo = 'Maíz'; 
 
     this.climateService.obtenerRecomendacion(cultivo, this.selectedLat, this.selectedLon)
       .subscribe({

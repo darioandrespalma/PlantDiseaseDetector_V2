@@ -1,48 +1,118 @@
-.page { padding: 16px; }
-.sub { opacity: 0.8; margin-bottom: 16px; }
-
-.form {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-input, select, button {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #444;
-  background: transparent;
-  color: inherit;
-}
-button { cursor: pointer; }
-
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
-.day {
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 6px;
-  min-height: 100px;
-}
-.day-header {
-  display: flex;
-  justify-content: space-between;
-  font-weight: bold;
-}
-.moon { font-size: 14px; }
-
-.task {
-  font-size: 12px;
-  margin-top: 4px;
-}
-.done {
-  text-decoration: line-through;
-  opacity: 0.6;
+/* Contenedor Principal */
+.page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: 'Inter', system-ui, sans-serif;
 }
 
-.header { display:flex; align-items:center; gap:12px; margin: 10px 0 16px; }
-.header h3 { margin:0; text-transform: capitalize; }
-.header button { padding: 6px 10px; }
+/* Formulario Flotante */
+.input-field {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #4ade80;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+}
+
+.label-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Calendario */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: #e2e8f0; /* Color de las líneas de división */
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.calendar-cell {
+    background-color: white;
+    min-height: 140px;
+    padding: 8px;
+    transition: background-color 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-cell:hover {
+    background-color: #fcfdfd;
+}
+
+.calendar-cell.empty {
+    background-color: #f8fafc;
+}
+
+/* Header del Día */
+.day-number {
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.moon-icon {
+    font-size: 1rem;
+    cursor: help;
+}
+
+/* Tareas (Chips) */
+.task-chip {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+}
+
+.task-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Estado Completado */
+.task-chip.completed {
+    background-color: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    border-color: #cbd5e1 !important;
+    text-decoration: line-through;
+}
+
+.check-icon {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.task-chip:hover .check-icon {
+    opacity: 1;
+}
+
+.task-chip.completed .check-icon {
+    opacity: 1;
+    color: #16a34a;
+}
