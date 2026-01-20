@@ -10,9 +10,7 @@ import { ResultComponent } from './components/result/result';
 import { MapSelectorComponent } from './components/map-selector/map-selector';
 import { BibliotecaComponent } from './components/biblioteca/biblioteca';
 import { BoletinComponent } from './components/boletin/boletin';
-
 import { TareasComponent } from './components/tareas/tareas';
-import { RecomendacionesComponent } from './components/recomendaciones/recomendaciones';
 
 
 import { authGuard } from './guards/auth-guard';
@@ -23,8 +21,6 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'tareas', component: TareasComponent },
-  { path: 'recomendaciones', component: RecomendacionesComponent },
-
 
   // RUTAS PRIVADAS (Protegidas por authGuard)
   {
@@ -35,7 +31,6 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'finca', component: FincaComponent },
       //{ path: 'tareas', component: TareasComponent },
-      //{ path: 'recomendaciones', component: RecomendacionesComponent },
       { path: 'deteccion/:crop', component: DetectionComponent },
       { path: 'result/:id', component: ResultComponent },
       { path: 'mapa', component: MapSelectorComponent },

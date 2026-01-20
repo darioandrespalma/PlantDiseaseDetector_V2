@@ -18,6 +18,7 @@ const climateRoutes = require('./routes/climate');
 const loteRoutes = require('./routes/lotes'); // ✅ Solo una vez
 const taskRoutes = require('./routes/tasks');      
 const dashboardRoutes = require('./routes/dashboard');
+const newsRoutes = require('./routes/news');
 const Bulletin = require('./models/Bulletin'); // Modelo para ruta inline
 
 // --- Configuración Inicial ---
@@ -76,6 +77,7 @@ app.use('/api/climate', climateRoutes);
 app.use('/api/lotes', loteRoutes);
 app.use('/api/tasks', taskRoutes);         
 app.use('/api/dashboard', dashboardRoutes); 
+app.use('/api/news', newsRoutes);
 
 // ✅ RUTA CULTIVOS (Necesaria para el selector del mapa)
 const routerCultivos = express.Router();

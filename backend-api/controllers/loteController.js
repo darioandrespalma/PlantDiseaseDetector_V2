@@ -1,4 +1,7 @@
 const Lote = require('../models/Lote');
+const Cultivo = require('../models/Cultivo');
+const DailyRecommendation = require('../models/DailyRecommendation');
+const Task = require('../models/Task'); // Asumo que tienes un modelo Task
 
 // ✅ 1. Obtener todos los lotes del usuario (Faltaba esta función)
 exports.obtenerLotes = async (req, res) => {
@@ -102,3 +105,89 @@ exports.eliminarLote = async (req, res) => {
     res.status(500).json({ success: false, error: 'Error al eliminar lote' });
   }
 };
+
+exports.obtenerLotesConRecomendaciones = async (req, res) => {
+  try {
+    const lotes = await Lote.find({ usuario: req.user._id, activo: true })
+      .populate('cultivo');
+
+    // Array enriquecido
+    const lotesConData = [];
+
+    for (let lote of lotes) {
+      // 1. Simulación rápida de clima (Aquí conectarías OpenWeatherApi en producción)
+      const climaHoy = { temp: 24, lluvia: 0, humedad: 40 }; // Ejemplo: Día seco y caluroso
+      
+      // 2. GENERAR RECOMENDACIONES EN TIEMPO REAL (O buscarlas de la BD si ya existen hoy)
+      // Por simplicidad, las generamos al vuelo para este demo:
+      const recomendaciones = [];
+
+      // Lógica de Riego
+      if (climaHoy.lluvia < lote.cultivo.lluviaMinima) {
+         recomendaciones.push({
+            tipo: 'riego',
+            mensaje: `Baja precipitación detectada (${climaHoy.lluvia}mm).`,
+            accionSugerida: 'Activar riego por 45 minutos hoy en la tarde.',
+            estado: 'pendiente'
+         });
+      }
+
+      // Lógica de Temperatura
+      if (climaHoy.temp > lote.cultivo.tempOptima.max) {
+         recomendaciones.push({
+            tipo: 'general',
+            mensaje: `Ola de calor (${climaHoy.temp}°C).`,
+            accionSugerida: 'Revisar humedad del suelo y proteger plántulas jóvenes.',
+            estado: 'pendiente'
+         });
+      }
+
+      lotesConData.push({
+        ...lote.toObject(),
+        recomendacionesDelDia: recomendaciones
+      });
+    }
+
+    res.json({ success: true, data: lotesConData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Error analizando lotes' });
+  }
+};
+
+// ✅ NUEVA FUNCIÓN: Aceptar Recomendación -> Convertir en Tarea
+exports.aceptarRecomendacion = async (req, res) => {
+  try {
+    const { loteId, mensaje, accion } = req.body;
+    
+    // Crear la tarea automáticamente
+    const nuevaTarea = new Task({
+      user: req.user._id, // Asegúrate que tu modelo Task use 'user' o 'usuario'
+      title: `Auto: ${mensaje}`, // Ej: Auto: Baja precipitación...
+      description: accion,
+      status: 'pending',
+      date: new Date(),
+      priority: 'high'
+    });
+
+    await nuevaTarea.save();
+
+    res.json({ success: true, message: 'Tarea creada automáticamente', tarea: nuevaTarea });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Error creando tarea' });
+  }
+};
+
+// ✅ NUEVA FUNCIÓN: Eliminar Lote
+exports.eliminarLote = async (req, res) => {
+  try {
+    await Lote.findByIdAndUpdate(req.params.id, { activo: false });
+    res.json({ success: true, message: 'Lote eliminado' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Error eliminando lote' });
+  }
+};
+
+
+

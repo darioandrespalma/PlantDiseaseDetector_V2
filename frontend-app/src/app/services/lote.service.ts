@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class LoteService {
-  // 🔴 CAMBIO OBLIGATORIO: Cambia 5000 por 3000
   private apiUrl = 'http://127.0.0.1:3000/api'; 
 
   constructor(private http: HttpClient) {}
@@ -15,7 +14,20 @@ export class LoteService {
     return this.http.get(`${this.apiUrl}/cultivos`); 
   }
 
+  // Ahora esto trae lotes + recomendaciones
+  obtenerLotes(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/lotes`);
+  }
+
   crearLote(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/lotes`, data);
+  }
+
+  eliminarLote(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/lotes/${id}`);
+  }
+
+  aceptarRecomendacion(data: { loteId: string, mensaje: string, accion: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/lotes/aceptar-recomendacion`, data);
   }
 }

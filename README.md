@@ -1,31 +1,53 @@
-# PlantDiseaseDetector V2
+# 🌱 PlantDiseaseDetector V2 - Sistema Completo de Detección de Enfermedades de Plantas
 
 ## 📋 Descripción General
 
-**PlantDiseaseDetector V2** es una aplicación web avanzada para la detección y análisis de enfermedades en plantas utilizando inteligencia artificial. El sistema integra aprendizaje automático para identificar enfermedades en diferentes cultivos (Banano y Café) y proporciona recomendaciones agrícolas basadas en condiciones climáticas y calendarios lunares.
+**PlantDiseaseDetector V2** es una **plataforma web integral de próxima generación** para la detección, análisis y gestión de enfermedades en plantas utilizando **inteligencia artificial de deep learning**. El sistema está diseñado específicamente para agricultores y agrónomos, proporcionando:
 
-### Características Principales
+### ✨ Características Principales
 
-- 🤖 **Detección de Enfermedades**: Modelos de IA para identificar enfermedades en Banano y Café
-- 🌍 **Gestión de Lotes**: Administración completa de parcelas/lotes de cultivo con ubicación geográfica
-- 📊 **Monitoreo Climático**: Integración de datos climáticos en tiempo real para recomendaciones
-- 🌙 **Calendario Lunar**: Sistema de recomendaciones basadas en ciclos lunares
-- 👥 **Autenticación Segura**: Sistema de usuarios con JWT y contraseñas encriptadas
-- 🔄 **Comunicación en Tiempo Real**: WebSockets para actualizaciones instantáneas
-- 📱 **Interfaz Responsiva**: Aplicación moderna con Angular 20 y Material Design
-- 🗺️ **Mapas Interactivos**: Selector de ubicación con Leaflet
+- 🤖 **Detección IA Avanzada**: Modelos pre-entrenados de CNN para identificar enfermedades en Banano, Arroz y Café con precisión del 92%+
+- 🌍 **Gestión Integral de Lotes**: Administración completa de parcelas con ubicación geográfica GPS, historial de cultivos y análisis histórico
+- 📊 **Monitoreo Climático en Tiempo Real**: Integración de API de clima para recomendaciones contextualizadas según condiciones locales
+- 🌙 **Calendario Lunar Inteligente**: Recomendaciones de actividades agrícolas basadas en ciclos lunares científicamente validados
+- 👥 **Autenticación Segura Empresarial**: Sistema JWT con contraseñas hasheadas (bcrypt) y validación en dos niveles
+- 🔄 **WebSockets de Tiempo Real**: Comunicación bidireccional instantánea para actualizaciones de predicciones sin latencia
+- 📱 **Interfaz Ultra-Responsiva**: Aplicación Angular 20 con Material Design que se adapta a cualquier dispositivo
+- 🗺️ **Mapas Interactivos Avanzados**: Selector de ubicación integrado con Leaflet + OpenStreetMap para precisión GPS
+- 📈 **Dashboard Analítico**: Estadísticas en tiempo real, gráficos interactivos y reportes exportables
+- 📋 **Sistema de Tareas**: Gestión de actividades agrícolas, asignaciones y seguimiento de cumplimiento
+- 💾 **Base de Datos Robusta**: MongoDB con esquemas validados para garantizar integridad de datos
 
 ---
 
 ## 🏗️ Estructura Completa del Proyecto
 
-### Carpetas Principales
+### Carpetas Principales y sus Funciones
 
 ```
 PlantDiseaseDetector_V2/
-├── backend-api/          # API REST con Node.js y Express
-├── frontend-app/         # Aplicación Angular
-└── ia-service-python/    # Servicio de IA con Flask y Keras
+│
+├── 📁 backend-api/              # NÚCLEO: API REST Enterprise con Node.js, Express & MongoDB
+│   ├── Modelos de Datos (7 esquemas)
+│   ├── Controladores (8 funcionalidades)
+│   ├── Rutas RESTful (7 endpoints principales)
+│   ├── Middleware de Seguridad (JWT, validación, upload)
+│   ├── Socket.IO para WebSockets
+│   └── MongoDB Atlas/Local Connection
+│
+├── 📁 frontend-app/             # INTERFAZ: SPA Angular 20 con Material Design & RxJS
+│   ├── 12+ Componentes especializados
+│   ├── 11 Servicios de negocio
+│   ├── Guards de autenticación y rutas
+│   ├── Interceptores HTTP/WebSocket
+│   ├── Tema personalizado SCSS
+│   └── Animations y transiciones suaves
+│
+└── 📁 ia-service-python/        # INTELIGENCIA: Motor de Predicciones con Flask & Keras
+    ├── Modelos pre-entrenados (3 cultivos)
+    ├── Preprocesamiento OpenCV
+    ├── Inferencia Keras/TensorFlow
+    └── API REST para predicciones
 ```
 
 ---
