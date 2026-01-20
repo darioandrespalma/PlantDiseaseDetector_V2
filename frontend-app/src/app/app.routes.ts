@@ -20,7 +20,6 @@ export const routes: Routes = [
   // RUTAS PÚBLICAS (Sin Guard)
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'tareas', component: TareasComponent },
 
   // RUTAS PRIVADAS (Protegidas por authGuard)
   {
@@ -30,7 +29,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'finca', component: FincaComponent },
-      //{ path: 'tareas', component: TareasComponent },
+      { path: 'tareas', component: TareasComponent },
       { path: 'deteccion/:crop', component: DetectionComponent },
       { path: 'result/:id', component: ResultComponent },
       { path: 'mapa', component: MapSelectorComponent },
