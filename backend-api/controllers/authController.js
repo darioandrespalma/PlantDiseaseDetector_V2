@@ -2,47 +2,56 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-// Register a new user
+// --- REGISTRO DE USUARIO ---
 exports.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     
-    // Verificar si el usuario ya existe
+    // 1. Validar si existe
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'El usuario ya existe' });
+      return res.status(400).json({ message: 'El correo ya está registrado' });
     }
 
-    // Crear usuario (La contraseña se hashea en el modelo User con pre('save') generalmente, 
-    // pero si lo haces aquí manualmente como vi en tu código anterior, asegúrate de no doble hashear)
-    // Asumiré que el modelo se encarga o que envías la password tal cual para hash aquí.
-    // Si tu modelo NO tiene pre-save hash, descomenta la linea de hash abajo.
-    
-
+    // 2. Crear usuario (El modelo User.js ya hashea la password en pre-save)
     const user = await User.create({
       username,
       email,
-      password: req.body.password
+      password // Se pasa plano, el modelo lo encripta
     });
 
-    // Generar token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d',
-    });
+    // 3. Crear Payload (Estandarizado igual que Login)
+    const payload = {
+      user: {
+        _id: user._id, // Usamos guion bajo para consistencia con Mongo
+        username: user.username,
+        role: 'agricultor'
+      }
+    };
 
-    res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      token,
-    });
+    // 4. Firmar Token
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET || 'secretoseguro123',
+      { expiresIn: '30d' },
+      (err, token) => {
+        if (err) throw err;
+        // Respuesta exitosa
+        res.status(201).json({
+          success: true,
+          token,
+          user: payload.user
+        });
+      }
+    );
+
   } catch (error) {
-    console.error(error);
+    console.error('Error en registro:', error);
     res.status(500).json({ message: 'Error en el servidor al registrar' });
   }
 };
 
-// CAMBIO AQUÍ: De 'loginUser' a 'login'
+// --- LOGIN DE USUARIO ---
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -50,7 +59,7 @@ exports.login = async (req, res) => {
     // 1. Buscar usuario
     let user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Credenciales inválidas' }); // Usar message para consistencia
+      return res.status(400).json({ message: 'Credenciales inválidas' });
     }
 
     // 2. Comparar contraseñas
@@ -59,30 +68,26 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Credenciales inválidas' });
     }
 
-    // 3. Crear el Payload
+    // 3. Crear Payload (Igual que Register)
     const payload = {
       user: {
-        id: user.id,
-        nombre: user.username, // Ajustado a username según tu registro
-        rol: 'agricultor'
+        _id: user._id,
+        username: user.username,
+        role: 'agricultor'
       }
     };
 
-    // 4. Firmar el Token
+    // 4. Firmar Token
     jwt.sign(
       payload,
       process.env.JWT_SECRET || 'secretoseguro123',
-      { expiresIn: '8h' },
+      { expiresIn: '30d' }, // Aumentado a 30 días para evitar expiración rápida en desarrollo
       (err, token) => {
         if (err) throw err;
-        // Retornamos estructura consistente
-        res.json({ 
-            token, 
-            user: { 
-                _id: user.id, 
-                username: user.username, 
-                email: user.email 
-            } 
+        res.json({
+          success: true,
+          token,
+          user: payload.user
         });
       }
     );

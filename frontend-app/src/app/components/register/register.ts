@@ -119,25 +119,31 @@ export class RegisterComponent implements OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
-      this.toastr.warning('Revisa los campos del formulario');
-      return;
+      // Validación estricta
+      if (this.registerForm.invalid) {
+        this.registerForm.markAllAsTouched(); // Muestra todos los errores rojos
+        this.toastr.warning('Por favor completa el formulario correctamente', 'Formulario inválido');
+        return;
+      }
+
+      const { username, email, password } = this.registerForm.value;
+      this.isLoading = true;
+
+      this.authService.register({ username, email, password })
+        .pipe(finalize(() => (this.isLoading = false)))
+        .subscribe({
+          next: (res) => { // 'res' es la respuesta del backend
+            this.toastr.success(`Bienvenido, ${username}`, '¡Cuenta Creada!');
+            // Opcional: Auto-login guardando el token aquí si quieres
+            // localStorage.setItem('token', res.token); 
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            console.error('Error registro:', err);
+            // Mostrar mensaje específico del backend si existe
+            const msg = err.error?.message || 'No se pudo registrar. Intenta nuevamente.';
+            this.toastr.error(msg, 'Error de Registro');
+          }
+        });
     }
-
-    const { username, email, password } = this.registerForm.value;
-    this.isLoading = true;
-
-    this.authService.register({ username, email, password })
-      .pipe(finalize(() => (this.isLoading = false)))
-      .subscribe({
-        next: () => {
-          this.toastr.success('Cuenta creada exitosamente', '¡Registro completo!');
-          this.router.navigate(['/login']);
-        },
-        error: (err) => {
-          this.toastr.error(err?.error?.message || 'Error al registrarse', 'Error');
-        }
-      });
-  }
 }

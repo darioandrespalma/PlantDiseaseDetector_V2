@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { register, login } = require('../controllers/authController');
+const authController = require('../controllers/authController');
 
-// Register new user
-router.post('/register', register);
-
-// Login user
-router.post('/login', login);
+// Rutas Públicas (Sin authMiddleware)
+router.post('/register', authController.register);
+router.post('/login', authController.login);
 
 module.exports = router;

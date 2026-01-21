@@ -33,9 +33,6 @@ export class TareasComponent implements OnInit {
   
   tipos = ['Riego', 'Fertilizacion', 'Siembra', 'Cosecha', 'Poda', 'Monitoreo'];
   
-  // NOTA: El orden debe coincidir con getDay() de JS (0=Dom, 1=Lun...)
-  diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']; 
-
   ngOnInit() {
     this.cargarLotes();
     this.cargarTareas();
