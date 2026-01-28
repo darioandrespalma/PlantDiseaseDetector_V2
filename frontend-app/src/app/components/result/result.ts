@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // ✅ Importar
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -25,7 +25,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
     MatIconModule,
     MatChipsModule,
     MatProgressBarModule,
-    MatProgressSpinnerModule // ✅ Añadir aquí
+    MatProgressSpinnerModule
   ],
   templateUrl: './result.html',
   styleUrls: ['./result.css'],
@@ -90,12 +90,44 @@ export class ResultComponent implements OnInit, OnDestroy {
     return 'var(--color-error)';
   }
 
+  scheduleTreatment() {
+    if (!this.prediction) return;
+
+    // 1. Detectar si es planta sana o enferma para el título y tipo
+    const diseaseName = this.prediction.result.disease.toLowerCase();
+    const isHealthy = diseaseName.includes('healthy') || diseaseName.includes('sana') || diseaseName.includes('saludable');
+
+    // 2. Formatear las recomendaciones como notas de texto
+    const recomendacionesTexto = this.prediction.result.recommendations && this.prediction.result.recommendations.length > 0
+      ? `\n- ${this.prediction.result.recommendations.join('\n- ')}`
+      : 'Sin recomendaciones específicas.';
+
+    const rawConf = this.prediction.result.confidence;
+    const porcentaje = this.prediction.result.confidence;
+
+    const notasCompletas = `Diagnóstico IA (Confianza: ${(this.prediction.result.confidence * 100).toFixed(0)}%):${recomendacionesTexto}`;
+
+    // 3. Preparar parámetros para enviar a Tareas
+    const queryParams = {
+      autoFill: 'true',
+      titulo: isHealthy 
+        ? `Monitoreo Preventivo: ${this.prediction.crop}` 
+        : `Tratamiento Fitosanitario: ${this.prediction.result.disease}`,
+      tipo: isHealthy ? 'Monitoreo' : 'Sanidad', // 'Sanidad' se usará en Tareas
+      fecha: new Date().toISOString().split('T')[0], // Fecha de hoy
+      notas: notasCompletas,
+      // Si tuvieras el loteId en la predicción, podrías pasarlo: loteId: this.prediction.loteId
+    };
+
+    // 4. Navegar
+    this.router.navigate(['/tareas'], { queryParams: queryParams });
+  }
+
   goBack() {
     const crop = this.prediction?.crop || 'banana';
     this.predictService.clearPrediction();
     this.router.navigate(['/deteccion', crop]);
   }
-
 
   goToHistory() {
     this.router.navigate(['/dashboard']);

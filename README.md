@@ -2,21 +2,21 @@
 
 ## 📋 Descripción General
 
-**PlantDiseaseDetector V2** es una **plataforma web integral de próxima generación** para la detección, análisis y gestión de enfermedades en plantas utilizando **inteligencia artificial de deep learning**. El sistema está diseñado específicamente para agricultores y agrónomos, proporcionando:
+**PlantDiseaseDetector V2** es una **plataforma web integral de próxima generación** para la detección, análisis y gestión de enfermedades en plantas utilizando **inteligencia artificial de deep learning**. Este sistema está diseñado específicamente para agricultores, agrónomos y profesionales del sector agrícola, proporcionando herramientas avanzadas para mejorar la salud de los cultivos y optimizar la producción agrícola.
 
 ### ✨ Características Principales
 
-- 🤖 **Detección IA Avanzada**: Modelos pre-entrenados de CNN para identificar enfermedades en Banano, Arroz y Café con precisión del 92%+
-- 🌍 **Gestión Integral de Lotes**: Administración completa de parcelas con ubicación geográfica GPS, historial de cultivos y análisis histórico
-- 📊 **Monitoreo Climático en Tiempo Real**: Integración de API de clima para recomendaciones contextualizadas según condiciones locales
-- 🌙 **Calendario Lunar Inteligente**: Recomendaciones de actividades agrícolas basadas en ciclos lunares científicamente validados
-- 👥 **Autenticación Segura Empresarial**: Sistema JWT con contraseñas hasheadas (bcrypt) y validación en dos niveles
-- 🔄 **WebSockets de Tiempo Real**: Comunicación bidireccional instantánea para actualizaciones de predicciones sin latencia
-- 📱 **Interfaz Ultra-Responsiva**: Aplicación Angular 20 con Material Design que se adapta a cualquier dispositivo
-- 🗺️ **Mapas Interactivos Avanzados**: Selector de ubicación integrado con Leaflet + OpenStreetMap para precisión GPS
-- 📈 **Dashboard Analítico**: Estadísticas en tiempo real, gráficos interactivos y reportes exportables
-- 📋 **Sistema de Tareas**: Gestión de actividades agrícolas, asignaciones y seguimiento de cumplimiento
-- 💾 **Base de Datos Robusta**: MongoDB con esquemas validados para garantizar integridad de datos
+- 🤖 **Detección IA Avanzada**: Utiliza modelos pre-entrenados de Redes Neuronales Convolucionales (CNN) para identificar enfermedades en cultivos de Banano, Arroz y Café con una precisión superior al 92%.
+- 🌍 **Gestión Integral de Lotes**: Permite la administración completa de parcelas agrícolas, incluyendo ubicación geográfica GPS, historial de cultivos y análisis de datos históricos para una mejor toma de decisiones.
+- 📊 **Monitoreo Climático en Tiempo Real**: Integra una API de clima que proporciona recomendaciones personalizadas basadas en las condiciones climáticas locales, ayudando a los agricultores a planificar sus actividades.
+- 🌙 **Calendario Lunar Inteligente**: Ofrece recomendaciones de actividades agrícolas basadas en ciclos lunares científicamente validados, optimizando el rendimiento de los cultivos.
+- 👥 **Autenticación Segura Empresarial**: Implementa un sistema de autenticación JWT con contraseñas hasheadas (bcrypt) y validación en dos niveles para garantizar la seguridad de los datos.
+- 🔄 **WebSockets de Tiempo Real**: Facilita la comunicación bidireccional instantánea para actualizaciones de predicciones sin latencia, mejorando la experiencia del usuario.
+- 📱 **Interfaz Ultra-Responsiva**: Desarrollada con Angular 20 y Material Design, la aplicación se adapta a cualquier dispositivo, asegurando una experiencia de usuario fluida.
+- 🗺️ **Mapas Interactivos Avanzados**: Incluye un selector de ubicación integrado con Leaflet y OpenStreetMap para una precisión GPS mejorada.
+- 📈 **Dashboard Analítico**: Proporciona estadísticas en tiempo real, gráficos interactivos y reportes exportables para un análisis profundo de los datos.
+- 📋 **Sistema de Tareas**: Permite la gestión de actividades agrícolas, asignaciones y seguimiento del cumplimiento de tareas.
+- 💾 **Base de Datos Robusta**: Utiliza MongoDB con esquemas validados para garantizar la integridad de los datos y un rendimiento óptimo.
 
 ---
 

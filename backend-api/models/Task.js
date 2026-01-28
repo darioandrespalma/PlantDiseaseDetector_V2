@@ -18,7 +18,7 @@ const TaskSchema = new mongoose.Schema({
   },
   tipo: {
     type: String,
-    enum: ['Riego', 'Fertilizacion', 'Siembra', 'Cosecha', 'Poda', 'Monitoreo', 'Otro'],
+    enum: ['Riego', 'Fertilizacion', 'Siembra', 'Cosecha', 'Poda', 'Monitoreo', 'Sanidad', 'Otro'],
     required: true
   },
   fechaProgramada: {
