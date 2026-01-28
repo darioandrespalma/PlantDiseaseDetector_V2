@@ -3,6 +3,8 @@ const Prediction = require('../models/Prediction');
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
+const mongoose = require('mongoose');
+
 
 exports.predictDisease = async (req, res) => {
   // 1. Validación inicial
@@ -10,7 +12,7 @@ exports.predictDisease = async (req, res) => {
     return res.status(400).json({ message: 'No se subió ningún archivo. Asegúrate de enviar el campo "file".' });
   }
 
-  const { crop } = req.body;
+  const { crop, lat, lon } = req.body;
   if (!crop || !['banana', 'rice', 'coffee'].includes(crop)) {
     // Eliminamos el archivo si hay error de validación para no llenar basura
     try { fs.unlinkSync(req.file.path); } catch(e){}
@@ -38,11 +40,22 @@ exports.predictDisease = async (req, res) => {
         ? ['Continuar con el monitoreo regular.', 'Mantener buenas prácticas de riego.']
         : ['Aislar la planta afectada.', 'Consultar con un agrónomo para fungicidas específicos.'];
 
+    // --- Construir Objeto de Ubicación ---
+    let locationData = undefined;
+    if (lat && lon) {
+        locationData = {
+            type: 'Point',
+            coordinates: [parseFloat(lon), parseFloat(lat)] // Mongo: [Lon, Lat]
+        };
+    }
+
+
     // --- Guardar en base de datos ---
     const prediction = await Prediction.create({
       user: req.user._id,
       imagePath: req.file.filename, // Guardamos solo el nombre del archivo
       crop: crop,
+      location: locationData, // <--- Guardamos ubicación
       result: {
         disease: aiResponse.data.prediction,
         confidence: aiResponse.data.confidence,

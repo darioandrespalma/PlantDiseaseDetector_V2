@@ -7,7 +7,7 @@ const predictionSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  crop: { // <--- Nuevo campo
+  crop: {
     type: String,
     enum: ['banana', 'rice', 'coffee'],
     required: true
@@ -16,6 +16,19 @@ const predictionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // --- NUEVO: Geolocalización (GeoJSON) ---
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'], 
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // [Longitud, Latitud] (Importante: Mongo usa Long, Lat)
+      index: '2dsphere' // Índice para búsquedas rápidas en mapas
+    }
+  },
+  // ----------------------------------------
   result: {
     disease: {
       type: String,

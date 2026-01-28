@@ -7,6 +7,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LoteDialogComponent } from '../lote-dialog/lote-dialog';
 import { LoteService } from '../../services/lote.service';
 import { TaskService } from '../../services/task.service'; // ✅ CAMBIO: Importar TaskService
+import { PredictService } from '../../services/predict';
 import { ToastrService } from 'ngx-toastr';
 import { ClimateService, Recomendacion } from '../../services/climate';
 
@@ -35,11 +36,13 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
   private map: any;
   private marker: any;
   private markersGroup: any;
+  private incidentLayerGroup: any;
   private isBrowser: boolean;
 
   // Inyección de dependencias moderna (puedes usar constructor también)
   private taskService = inject(TaskService); // ✅ CAMBIO: Inyección TaskService
   private router = inject(Router); // ✅ CAMBIO: Inyección Router
+  private predictService = inject(PredictService);
 
   // Variables Filtro y Mapa
   provincias = PROVINCIAS;
@@ -170,7 +173,10 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
     }).addTo(this.map);
 
     this.markersGroup = L.layerGroup().addTo(this.map);
+    this.incidentLayerGroup = L.layerGroup().addTo(this.map);
+
     this.pintarLotesEnMapa();
+    this.cargarCapasSalud(L);
 
     this.map.on('click', (event: any) => {
       const { lat, lng } = event.latlng;
@@ -184,6 +190,77 @@ export class MapSelectorComponent implements AfterViewInit, OnInit {
       }
 
       this.abrirDialogoRegistro(lat, lng);
+    });
+  }
+  async cargarCapasSalud(L: any) {
+    this.predictService.getPredictionHistory().subscribe({
+      next: (predictions) => {
+        if (!this.incidentLayerGroup) return;
+        this.incidentLayerGroup.clearLayers(); // Limpiar antes de pintar
+
+        const fechaActual = new Date();
+        const sieteDiasAtras = new Date();
+        sieteDiasAtras.setDate(fechaActual.getDate() - 7);
+
+        predictions.forEach(pred => {
+          // Verificar que tenga geo (mongo guarda [lon, lat])
+          if (pred.location && pred.location.coordinates && pred.location.coordinates.length === 2) {
+            
+            const [lon, lat] = pred.location.coordinates; // Extraer
+            
+            // Ignorar sanas si quieres, o pintarlas verde claro
+            if (pred.result.disease.toLowerCase() === 'healthy') return;
+
+            const fechaPred = new Date(pred.createdAt);
+            const esReciente = fechaPred > sieteDiasAtras;
+
+            // Lógica de colores
+            const color = esReciente ? '#ff3333' : '#ffc107'; // Rojo vs Amarillo
+            const fillColor = esReciente ? '#ff0000' : '#ffd54f';
+            const radio = esReciente ? 12 : 8;
+
+            // 1. Crear el punto (CircleMarker)
+            const marker = L.circleMarker([lat, lon], {
+              radius: radio,
+              fillColor: fillColor,
+              color: '#fff',
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.9
+            });
+
+            // 2. Popup Rico en HTML
+            const popupContent = `
+              <div style="text-align: center; font-family: sans-serif;">
+                <h4 style="margin:0; color:${fillColor}; font-weight:bold; text-transform: uppercase;">
+                  ${pred.result.disease}
+                </h4>
+                <p style="margin:5px 0; font-size:12px;">Confianza: ${(pred.result.confidence * 100).toFixed(1)}%</p>
+                <div style="width:100px; height:100px; overflow:hidden; border-radius:8px; margin: 5px auto;">
+                  <img src="http://localhost:3000/uploads/${pred.imagePath}" 
+                       style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <small style="color:#666;">${new Date(pred.createdAt).toLocaleDateString()}</small>
+                <br>
+                <a href="/result/${pred._id}" style="color:#2e7d32; font-size:11px; text-decoration:none;">Ver Detalle Completo →</a>
+              </div>
+            `;
+            marker.bindPopup(popupContent);
+            marker.addTo(this.incidentLayerGroup);
+
+            // 3. Radio de Infección (Solo recientes y alta confianza)
+            if (esReciente && pred.result.confidence > 0.85) {
+              L.circle([lat, lon], {
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.15,
+                radius: 100 // 100 metros de alerta alrededor
+              }).addTo(this.incidentLayerGroup);
+            }
+          }
+        });
+      },
+      error: (err) => console.error('Error cargando historial de salud:', err)
     });
   }
 

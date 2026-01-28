@@ -53,6 +53,9 @@ export class DetectionComponent implements OnInit, OnDestroy {
   isDragging = false;
   loading = false;
   errorMessage: string | null = null;
+  gpsCoords: { lat: number, lon: number } | null = null;
+  gpsError: string | null = null;
+  gettingLocation = false;
 
 // ✅ Config por cultivo (claves alineadas con la URL y backend)
 cropConfigMap: Record<string, { title: string; subtitle: string; icon: string; alt: string }> = {
@@ -79,6 +82,40 @@ cropConfigMap: Record<string, { title: string; subtitle: string; icon: string; a
 get currentCropConfig() {
   return this.cropConfigMap[this.crop] || this.cropConfigMap['banana'];
 }
+
+getLocation() {
+    this.gettingLocation = true;
+    this.gpsError = null;
+
+    if (!navigator.geolocation) {
+      this.gpsError = 'Geolocalización no soportada por este navegador.';
+      this.gettingLocation = false;
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.gpsCoords = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude
+        };
+        this.gettingLocation = false;
+        console.log('📍 Ubicación capturada:', this.gpsCoords);
+      },
+      (error) => {
+        this.gettingLocation = false;
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            this.gpsError = 'Permiso de ubicación denegado.'; break;
+          case error.POSITION_UNAVAILABLE:
+            this.gpsError = 'Ubicación no disponible.'; break;
+          case error.TIMEOUT:
+            this.gpsError = 'Tiempo de espera agotado.'; break;
+        }
+      },
+      { enableHighAccuracy: true } // Mayor precisión para fincas
+    );
+  }
 
 
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>; // ✅ Referencia
@@ -123,6 +160,7 @@ get currentCropConfig() {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     this.handleFile(file);
+    this.getLocation();
   }
 
   onDragOver(event: DragEvent) {
@@ -168,15 +206,22 @@ get currentCropConfig() {
 
   uploadImage() {
     if (!this.selectedFile || !this.crop) return;
+    // Intentar obtener ubicación si no se tiene, antes de subir (opcional)
+    if (!this.gpsCoords && !this.gpsError) {
+        // Puedes forzar la geolocalización aquí o dejar que sea manual con un botón
+        // this.getLocation(); 
+    }
 
-    this.errorMessage = null;
-    this.predictService.uploadImage(this.selectedFile, this.crop).subscribe({
-      error: (err) => {
-        console.error('Error en upload:', err);
-        this.errorMessage = 'Error al subir la imagen. Intenta de nuevo.';
-        this.predictService.clearPrediction();
-      }
-    });
+    // Llamamos al servicio (asegúrate de actualizar tu predictService para aceptar coords)
+    // Aquí asumo que modificas predictService.uploadImage para aceptar un 3er argumento opcional o un objeto
+    this.predictService.uploadImage(this.selectedFile, this.crop, this.gpsCoords ?? undefined)
+      .subscribe({
+        error: (err) => {
+          console.error('Error en upload:', err);
+          this.errorMessage = 'Error al subir la imagen.';
+          this.predictService.clearPrediction();
+        }
+      });
   }
 
   removeImage() {
