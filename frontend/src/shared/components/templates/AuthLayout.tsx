@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import DarkVeil from '@/shared/components/ui/DarkVeil';
-import logo from '/public/logo.svg'; // Asegúrate de tener tu logo.svg en public
+import logo from '/public/logo.svg';
 
 interface AuthLayoutProps {
   children: ReactNode;
