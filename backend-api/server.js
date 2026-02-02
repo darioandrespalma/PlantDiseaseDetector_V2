@@ -30,6 +30,7 @@ const PORT = process.env.PORT || 3000;
 
 // 🟢 CORS ROBUSTO: Permite Angular en localhost y 127.0.0.1
 const allowedOrigins = [
+  'http://localhost:5173',
   'http://localhost:4200',
   'http://127.0.0.1:4200',
   process.env.FRONTEND_URL

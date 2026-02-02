@@ -12,7 +12,7 @@
 - 🌙 **Calendario Lunar Inteligente**: Ofrece recomendaciones de actividades agrícolas basadas en ciclos lunares científicamente validados, optimizando el rendimiento de los cultivos.
 - 👥 **Autenticación Segura Empresarial**: Implementa un sistema de autenticación JWT con contraseñas hasheadas (bcrypt) y validación en dos niveles para garantizar la seguridad de los datos.
 - 🔄 **WebSockets de Tiempo Real**: Facilita la comunicación bidireccional instantánea para actualizaciones de predicciones sin latencia, mejorando la experiencia del usuario.
-- 📱 **Interfaz Ultra-Responsiva**: Desarrollada con Angular 20 y Material Design, la aplicación se adapta a cualquier dispositivo, asegurando una experiencia de usuario fluida.
+- 📱 **Interfaz Ultra-Responsiva**: Desarrollada con React, Vite y TypeScript; la aplicación se adapta a cualquier dispositivo, asegurando una experiencia de usuario fluida.
 - 🗺️ **Mapas Interactivos Avanzados**: Incluye un selector de ubicación integrado con Leaflet y OpenStreetMap para una precisión GPS mejorada.
 - 📈 **Dashboard Analítico**: Proporciona estadísticas en tiempo real, gráficos interactivos y reportes exportables para un análisis profundo de los datos.
 - 📋 **Sistema de Tareas**: Permite la gestión de actividades agrícolas, asignaciones y seguimiento del cumplimiento de tareas.
@@ -35,7 +35,7 @@ PlantDiseaseDetector_V2/
 │   ├── Socket.IO para WebSockets
 │   └── MongoDB Atlas/Local Connection
 │
-├── 📁 frontend-app/             # INTERFAZ: SPA Angular 20 con Material Design & RxJS
+├── 📁 frontend/                 # INTERFAZ: SPA React + Vite + TypeScript
 │   ├── 12+ Componentes especializados
 │   ├── 11 Servicios de negocio
 │   ├── Guards de autenticación y rutas
@@ -48,351 +48,8 @@ PlantDiseaseDetector_V2/
     ├── Preprocesamiento OpenCV
     ├── Inferencia Keras/TensorFlow
     └── API REST para predicciones
-```
 
 ---
-
-## 🔧 Backend API (Node.js + Express)
-
-### Ubicación: `/backend-api`
-
-**Tecnologías:**
-- Node.js con Express 5.1.0
-- MongoDB con Mongoose 8.20.0
-- JWT para autenticación
-- Socket.IO para WebSockets
-- Multer para carga de archivos
-- node-cron para trabajos programados
-- bcrypt para encriptación de contraseñas
-
-### Estructura Completa
-
-```
-backend-api/
-├── config/
-│   └── db.js                        # Configuración y conexión MongoDB
-│
-├── controllers/
-│   ├── authController.js            # Autenticación: login, registro, validación JWT
-│   ├── climateController.js         # Datos climáticos: obtener, procesar
-│   ├── dashboardController.js       # Datos para dashboard: resúmenes, estadísticas
-│   ├── loteController.js            # CRUD lotes: crear, leer, actualizar, eliminar
-│   ├── mapController.js             # Gestión de mapas e ubicaciones
-│   ├── predictionController.js      # Predicciones de IA: enviar a servicio Python
-│   ├── recommendationController.js  # Recomendaciones agrícolas
-│   └── taskController.js            # Tareas: crear, asignar, completar
-│
-├── middleware/
-│   ├── authMiddleware.js            # Verificación de JWT en rutas protegidas
-│   ├── uploadMiddleware.js          # Configuración Multer para carga de imágenes
-│   └── validators.js                # Validación de datos de entrada
-│
-├── models/
-│   ├── User.js                      # Esquema Usuario (username, email, password)
-│   ├── Lote.js                      # Esquema Lote (cultivo, ubicación, historial)
-│   ├── Cultivo.js                   # Esquema Cultivo (Banano, Café, propiedades)
-│   ├── Prediction.js                # Esquema Predicción (resultado IA, confianza)
-│   ├── Task.js                      # Esquema Tarea (asignaciones, estado)
-│   └── Bulletin.js                  # Esquema Boletín (alertas, recomendaciones)
-│
-├── routes/
-│   ├── api.js                       # Rutas principales/agregadas
-│   ├── auth.js                      # POST /login, /register, /verify
-│   ├── climate.js                   # GET/POST datos climáticos
-│   ├── dashboard.js                 # GET estadísticas, resúmenes
-│   ├── lotes.js                     # CRUD lotes (GET, POST, PUT, DELETE)
-│   ├── predict.js                   # POST predicción de enfermedad
-│   └── tasks.js                     # CRUD tareas
-│
-├── services/
-│   └── matchingEngine.js            # Motor de coincidencia: datos clima vs cultivos
-│
-├── jobs/
-│   └── recomendacionJob.js          # Job cron: genera recomendaciones periódicas
-│
-├── scripts/
-│   └── seedCultivos.js              # Script para cargar cultivos iniciales
-│
-├── uploads/                         # Carpeta para imágenes cargadas
-│   ├── img-*.avif                   # Imágenes de plantas convertidas a AVIF
-│   └── ...
-│
-├── server.js                        # Archivo principal - inicializa Express, MongoDB, Socket.IO
-├── package.json                     # Dependencias Node.js
-├── .env                             # Variables de entorno (Puerto, BD, secretos)
-└── test_env.js                      # Script de prueba de conexión
-
-### Modelos de Base de Datos (MongoDB)
-
-#### User
-```
-{
-  _id: ObjectId
-  username: String (único)
-  email: String (único)
-  password: String (bcrypt)
-  rol: String (admin, usuario)
-  activo: Boolean
-  createdAt: Date
-  updatedAt: Date
-}
-```
-
-#### Lote
-```
-{
-  _id: ObjectId
-  nombre: String
-  usuario: ObjectId (referencia User)
-  cultivo: ObjectId (referencia Cultivo)
-  fechaSiembra: Date
-  area: Number (hectáreas/m²)
-  ubicacion: {
-    tipo: Point
-    coordenadas: [Long, Lat]
-  }
-  estadoSalud: String (saludable|riesgo|peligro)
-  historial: Array[
-    {
-      tipo: String (riego|fertilizante|plaga|enfermedad)
-      fecha: Date
-      descripcion: String
-    }
-  ]
-  createdAt: Date
-  updatedAt: Date
-}
-```
-
-#### Cultivo
-```
-{
-  _id: ObjectId
-  nombre: String (Banano|Café)
-  descripcion: String
-  enfermedadesComunes: Array[String]
-  condicionesOptimas: Object
-  createdAt: Date
-}
-```
-
-#### Prediction
-```
-{
-  _id: ObjectId
-  lote: ObjectId (referencia Lote)
-  usuario: ObjectId (referencia User)
-  imagen: String (ruta archivo)
-  enfermedad: String (resultado IA)
-  confianza: Number (0-100%)
-  tratamiento: String
-  createdAt: Date
-}
-```
-
-#### Task
-```
-{
-  _id: ObjectId
-  lote: ObjectId (referencia Lote)
-  usuario: ObjectId (referencia User)
-  titulo: String
-  descripcion: String
-  estado: String (pendiente|en_progreso|completada)
-  fechaVencimiento: Date
-  createdAt: Date
-  updatedAt: Date
-}
-```
-
-#### Bulletin
-```
-{
-  _id: ObjectId
-  titulo: String
-  contenido: String
-  tipo: String (alerta|recomendacion|informacion)
-  cultivos: Array[ObjectId]
-  fechaPublicacion: Date
-}
-```
-
----
-
-## 🎨 Frontend App (Angular 20)
-
-### Ubicación: `/frontend-app`
-
-**Tecnologías:**
-- Angular 20 (standalone components)
-- Angular Material Design
-- TypeScript
-- RxJS para manejo reactivo
-- Leaflet para mapas
-- Socket.IO Client para comunicación en tiempo real
-- ngx-toastr para notificaciones
-- SCSS para estilos
-
-### Estructura Completa
-
-```
-frontend-app/
-├── src/
-│   ├── app/
-│   │   │
-│   │   ├── components/
-│   │   │   ├── login/                      # Componente de login
-│   │   │   │   ├── login.ts               # Lógica autenticación
-│   │   │   │   ├── login.html             # Interfaz formulario
-│   │   │   │   └── login.css              # Estilos
-│   │   │   │
-│   │   │   ├── register/                   # Componente de registro
-│   │   │   │   ├── register.ts
-│   │   │   │   ├── register.html
-│   │   │   │   └── register.css
-│   │   │   │
-│   │   │   ├── main-layout/                # Layout principal con navbar
-│   │   │   │   ├── main-layout.ts         # Componente principal
-│   │   │   │   ├── main-layout.html
-│   │   │   │   └── main-layout.css
-│   │   │   │
-│   │   │   ├── dashboard/                  # Panel de control
-│   │   │   │   ├── dashboard.ts           # Estadísticas, resumen cultivos
-│   │   │   │   ├── dashboard.html
-│   │   │   │   └── dashboard.css
-│   │   │   │
-│   │   │   ├── finca/                      # Gestión de lotes/parcelas
-│   │   │   │   ├── finca.ts               # CRUD lotes, visualización
-│   │   │   │   ├── finca.html
-│   │   │   │   └── finca.css
-│   │   │   │
-│   │   │   ├── detection/                  # Detección de enfermedades
-│   │   │   │   ├── detection.ts           # Carga imagen, llama IA
-│   │   │   │   ├── detection.html
-│   │   │   │   └── detection.css
-│   │   │   │
-│   │   │   ├── result/                     # Resultado de predicción
-│   │   │   │   ├── result.ts              # Muestra enfermedad, confianza, tratamiento
-│   │   │   │   ├── result.html
-│   │   │   │   └── result.css
-│   │   │   │
-│   │   │   ├── recomendacion/              # Recomendaciones individuales
-│   │   │   │   ├── recomendacion.ts
-│   │   │   │   ├── recomendacion.html
-│   │   │   │   └── recomendacion.css
-│   │   │   │
-│   │   │   ├── recomendaciones/            # Lista de recomendaciones
-│   │   │   │   ├── recomendaciones.ts
-│   │   │   │   ├── recomendaciones.html
-│   │   │   │   └── recomendaciones.css
-│   │   │   │
-│   │   │   ├── tareas/                     # Gestión de tareas
-│   │   │   │   ├── tareas.ts              # CRUD tareas, asignación
-│   │   │   │   ├── tareas.html
-│   │   │   │   └── tareas.css
-│   │   │   │
-│   │   │   ├── boletin/                    # Boletín informativo
-│   │   │   │   ├── boletin.ts             # Alertas y notificaciones
-│   │   │   │   ├── boletin.html
-│   │   │   │   └── boletin.css
-│   │   │   │
-│   │   │   ├── biblioteca/                 # Biblioteca de información
-│   │   │   │   ├── biblioteca.ts          # Recursos, artículos
-│   │   │   │   ├── biblioteca.html
-│   │   │   │   └── biblioteca.css
-│   │   │   │
-│   │   │   ├── map-selector/               # Selector de ubicación en mapa
-│   │   │   │   ├── map-selector.ts        # Leaflet, búsqueda ubicación
-│   │   │   │   ├── map-selector.html
-│   │   │   │   └── map-selector.css
-│   │   │   │
-│   │   │   └── lunar-calendar/             # Calendario lunar
-│   │   │       ├── lunar-calendar.ts      # Ciclos lunares, recomendaciones
-│   │   │       ├── lunar-calendar.html
-│   │   │       └── lunar-calendar.css
-│   │   │
-│   │   ├── services/
-│   │   │   ├── auth.ts                     # Autenticación: login, registro, logout
-│   │   │   ├── auth.spec.ts               # Tests autenticación
-│   │   │   ├── predict.ts                 # Predicción: envía imagen a backend
-│   │   │   ├── predict.spec.ts            # Tests predicción
-│   │   │   ├── finca.service.ts           # CRUD lotes, consulta información
-│   │   │   ├── climate.ts                 # Datos climáticos en tiempo real
-│   │   │   ├── websocket.ts               # Conexión WebSocket con backend
-│   │   │   ├── websocket.spec.ts
-│   │   │   ├── theme.ts                   # Gestión de temas (claro/oscuro)
-│   │   │   └── toast.ts                   # Notificaciones en pantalla
-│   │   │
-│   │   ├── guards/
-│   │   │   ├── auth-guard.ts              # Protege rutas, verifica JWT
-│   │   │   └── auth-guard.spec.ts
-│   │   │
-│   │   ├── interceptors/
-│   │   │   └── auth.interceptor.ts        # Agrega token JWT a peticiones HTTP
-│   │   │
-│   │   ├── animations/
-│   │   │   └── auth-animations.ts         # Animaciones para transiciones
-│   │   │
-│   │   ├── app.ts                         # Componente raíz
-│   │   ├── app.html
-│   │   ├── app.css
-│   │   ├── app.spec.ts
-│   │   ├── app.routes.ts                  # Rutas principales (sin módulos)
-│   │   ├── app.routes.server.ts
-│   │   ├── app.config.ts                  # Configuración de providers
-│   │   ├── app.config.server.ts
-│   │   │
-│   ├── environments/
-│   │   └── environment.development.ts     # URLs API, configuración desarrollo
-│   │
-│   ├── index.html                         # HTML raíz
-│   ├── main.ts                            # Bootstrap de la aplicación
-│   ├── main.server.ts
-│   ├── server.ts
-│   ├── styles.scss                        # Estilos globales
-│   └── custom-theme.scss                  # Tema Material Design personalizado
-│
-├── public/                                # Recursos estáticos
-├── angular.json                           # Configuración Angular CLI
-├── tsconfig.json                          # Configuración TypeScript
-├── tsconfig.app.json
-├── tsconfig.spec.json
-└── package.json
-
-### Componentes Detallados
-
-| Componente | Funcionalidad |
-|-----------|--------------|
-| **login** | Autenticación de usuarios con email/contraseña |
-| **register** | Registro de nuevos usuarios |
-| **main-layout** | Navbar, sidebar, estructura general de la app |
-| **dashboard** | Resumen de cultivos, estadísticas de salud |
-| **finca** | Listado y gestión de lotes/parcelas |
-| **detection** | Carga de imagen para detección de enfermedad |
-| **result** | Muestra resultado de predicción, confianza, tratamiento |
-| **recomendacion** | Recomendación agrícola individual |
-| **recomendaciones** | Listado de todas las recomendaciones |
-| **tareas** | CRUD de tareas, asignación a usuarios |
-| **boletin** | Boletín informativo con alertas |
-| **biblioteca** | Recursos educativos y artículos |
-| **map-selector** | Selector de ubicación con Leaflet |
-| **lunar-calendar** | Calendario lunar con recomendaciones |
-
-### Servicios Detallados
-
-| Servicio | Responsabilidad |
-|---------|-----------------|
-| **auth.ts** | Manejo de login, registro, logout, validación JWT |
-| **predict.ts** | Envía imagen a backend para predicción de IA |
-| **finca.service.ts** | CRUD lotes, consultas de información |
-| **climate.ts** | Obtiene datos climáticos en tiempo real |
-| **websocket.ts** | Conexión WebSocket para actualizaciones instantáneas |
-| **theme.ts** | Gestión de temas (claro/oscuro) |
-| **toast.ts** | Notificaciones tipo toast |
-
----
-
-## 🐍 IA Service (Python Flask)
 
 ### Ubicación: `/ia-service-python`
 
@@ -501,15 +158,16 @@ ia-service-python/
 }
 ```
 
-### Frontend (Angular)
+### Frontend (React + Vite)
 ```json
 {
-  "@angular/core": "^20.0.0",
-  "@angular/material": "Material Design",
-  "leaflet": "para mapas",
-  "socket.io-client": "WebSocket cliente",
-  "rxjs": "programación reactiva",
-  "typescript": "^5.x"
+  "react": "^19.x",
+  "react-dom": "^19.x",
+  "vite": "^7.x",
+  "@vitejs/plugin-react": "^5.x",
+  "typescript": "~5.x",
+  "leaflet": "1.9.x",
+  "socket.io-client": "^4.x"
 }
 ```
 
@@ -556,105 +214,83 @@ npm test           # Ejecutar tests
 
 ---
 
-## 🎨 Frontend App (Angular 20)
+## 🎨 Frontend App (React + Vite + TypeScript)
 
-### Ubicación: `/frontend-app`
+### Ubicación: `/frontend`
 
 **Tecnologías:**
-- Angular 20.3.0
-- Angular Material 20.2.11
-- TypeScript
-- RxJS para programación reactiva
-- Socket.IO Client para WebSockets
-- Leaflet para mapas
-- ngx-toastr para notificaciones
+- React 19
+- Vite 7 (bundler + dev server) con HMR  
+- TypeScript 5
+- ESLint para linting
+- Leaflet para mapas (opcional)
+- Socket.IO Client para WebSockets (opcional)
 
-### Estructura de Componentes
+### Estructura del Proyecto
 
 ```
-frontend-app/
+frontend/
 ├── src/
-│   ├── app/
-│   │   ├── components/
-│   │   │   ├── login/              # Componente de inicio de sesión
-│   │   │   ├── register/           # Componente de registro
-│   │   │   ├── dashboard/          # Panel principal de control
-│   │   │   ├── finca/              # Gestión de fincas/lotes
-│   │   │   ├── detection/          # Detector de enfermedades
-│   │   │   ├── result/             # Resultados de predicciones
-│   │   │   ├── tareas/             # Gestión de tareas/bitácora
-│   │   │   ├── recomendacion/      # Sistema de recomendaciones
-│   │   │   ├── biblioteca/         # Biblioteca de cultivos
-│   │   │   ├── lunar-calendar/     # Calendario lunar
-│   │   │   ├── map-selector/       # Selector de ubicación
-│   │   │   └── main-layout/        # Layout principal
-│   │   ├── services/
-│   │   │   ├── auth.ts             # Servicio de autenticación
-│   │   │   ├── auth.spec.ts
-│   │   │   ├── predict.ts          # Servicio de predicciones
-│   │   │   ├── predict.spec.ts
-│   │   │   ├── climate.ts          # Servicio de clima
-│   │   │   ├── finca.service.ts    # Servicio de fincas/lotes
-│   │   │   ├── websocket.ts        # Servicio WebSocket
-│   │   │   ├── websocket.spec.ts
-│   │   │   ├── theme.ts            # Servicio de temas
-│   │   │   └── toast.ts            # Servicio de notificaciones
-│   │   ├── guards/
-│   │   │   ├── auth-guard.ts       # Guard de autenticación
-│   │   │   └── auth-guard.spec.ts
-│   │   ├── interceptors/
-│   │   │   └── auth.interceptor.ts # Interceptor de JWT
-│   │   ├── animations/
-│   │   │   └── auth-animations.ts  # Animaciones de autenticación
-│   │   ├── app.ts                  # Componente raíz
-│   │   └── app.routes.ts           # Enrutamiento principal
-│   ├── styles.scss                 # Estilos globales
-│   ├── custom-theme.scss           # Tema personalizado
-│   ├── main.ts                     # Bootstrap de la aplicación
-│   └── environments/
-│       └── environment.development.ts
-├── angular.json
-├── tsconfig.json
-└── package.json
+│   ├── features/              # Vistas y flujos principales
+│   │   ├── auth/              # Autenticación (login/register)
+│   │   ├── dashboard/         # Dashboard principal
+│   │   ├── detection/         # Detección de enfermedades
+│   │   └── farm/              # Gestión de lotes/fincas
+│   │
+│   ├── components/            # Componentes reutilizables
+│   │   ├── layout/            # Layout, navbar, sidebar
+│   │   └── ui/                # Componentes UI genéricos
+│   │
+│   ├── api/                   # Funciones y hooks para API calls
+│   ├── context/               # Context API para estado global
+│   ├── hooks/                 # Custom React hooks
+│   ├── routes/                # Configuración de rutas
+│   ├── types/                 # Tipos TypeScript
+│   ├── utils/                 # Utilidades y helpers
+│   ├── assets/                # Imágenes, iconos, etc.
+│   │
+│   ├── App.tsx                # Componente raíz
+│   ├── main.tsx               # Entry point
+│   ├── App.css                # Estilos de App
+│   └── index.css              # Estilos globales
+│
+├── public/                    # Recursos estáticos
+├── vite.config.ts             # Configuración Vite
+├── tsconfig.json              # Configuración TypeScript
+├── eslint.config.js           # Configuración ESLint
+├── index.html                 # HTML raíz
+└── package.json               # Dependencias
 ```
-
-### Componentes Principales
-
-1. **Login/Register**: Autenticación de usuarios
-2. **Dashboard**: Panel de control con estadísticas
-3. **Finca**: Gestión de parcelas/lotes con mapa
-4. **Detection**: Carga de imágenes para análisis de enfermedades
-5. **Result**: Visualización de resultados de IA
-6. **Tareas**: Bitácora de actividades agrícolas
-7. **Recomendación**: Sugerencias basadas en datos
-8. **Biblioteca**: Información sobre cultivos
-9. **Lunar Calendar**: Calendario lunar para siembras
 
 ### Scripts Disponibles
 
 ```bash
-npm start          # Iniciar servidor de desarrollo (puerto 4200)
-npm run build      # Compilar para producción
-npm run watch      # Compilación en modo watch
-npm test           # Ejecutar tests con Karma
-ng generate component component-name  # Generar componente
+npm install                # Instalar dependencias
+npm run dev                # Iniciar servidor de desarrollo (puerto 5173)
+npm run build              # Compilar para producción
+npm run preview            # Previsualizar build local
+npm run lint               # Ejecutar linter
 ```
 
-### Dependencias Principales
+### Features Principales
 
-- **@angular/core**: Core de Angular
-- **@angular/material**: Componentes Material Design
-- **@angular/router**: Enrutamiento
-- **@angular/animations**: Animaciones
-- **rxjs**: Programación reactiva
-- **socket.io-client**: Cliente WebSocket
+1. **auth**: Sistema de login y registro
+2. **dashboard**: Panel de control con estadísticas
+3. **detection**: Detección de enfermedades con carga de imágenes
+4. **farm**: Gestión de lotes/fincas con mapas y datos
+
+### Dependencias Clave
+
+- **react/react-dom**: Core de React
+- **typescript**: Tipado estático
+- **vite**: Build tool y dev server
+- **socket.io-client**: Comunicación en tiempo real
 - **leaflet**: Mapas interactivos
-- **ngx-toastr**: Notificaciones tipo Toast
-- **@angular/ssr**: Server-Side Rendering
+- **eslint**: Linting y code quality
 
 ---
 
-## 🐍 Servicio de IA (Python + Flask)
+## 🐍 IA Service (Python Flask)
 
 ### Ubicación: `/ia-service-python`
 
@@ -711,7 +347,7 @@ cd backend-api
 npm install
 
 # Crear archivo .env
-echo "FRONTEND_URL=http://localhost:4200
+echo "FRONTEND_URL=http://localhost:5173
 MONGO_URI=mongodb://localhost:27017/plant_disease_detector
 JWT_SECRET=tu_clave_secreta_aqui
 PORT=5000
@@ -727,14 +363,14 @@ npm run dev
 ### 2. Frontend App
 
 ```bash
-cd frontend-app
+cd frontend
 npm install
 
-# Iniciar servidor de desarrollo
-npm start
+# Iniciar servidor de desarrollo (Vite)
+npm run dev
 ```
 
-La aplicación estará disponible en `http://localhost:4200`
+La aplicación estará disponible en `http://localhost:5173`
 
 ### 3. Servicio de IA
 
@@ -791,7 +427,7 @@ El proyecto usa **Socket.IO** para:
 
 | Capa | Tecnología | Versión |
 |------|-----------|---------|
-| **Frontend** | Angular | 20.3.0 |
+| **Frontend** | React + Vite | 19.x / 7.x |
 | **Backend** | Node.js + Express | 5.1.0 |
 | **Base de Datos** | MongoDB | (con Mongoose 8.20.0) |
 | **IA** | Python + Flask | - |
@@ -799,7 +435,7 @@ El proyecto usa **Socket.IO** para:
 | **Autenticación** | JWT | 9.0.2 |
 | **Tiempo Real** | Socket.IO | 4.8.1 |
 | **Mapas** | Leaflet | 1.9.4 |
-| **UI** | Angular Material | 20.2.11 |
+| **Tipado** | TypeScript | 5.x |
 
 ---
 
@@ -808,7 +444,7 @@ El proyecto usa **Socket.IO** para:
 ### Backend (.env)
 
 ```env
-FRONTEND_URL=http://localhost:4200
+FRONTEND_URL=http://localhost:5173
 MONGO_URI=mongodb://localhost:27017/plant_disease_detector
 JWT_SECRET=tu_clave_super_secreta
 JWT_EXPIRE=7d

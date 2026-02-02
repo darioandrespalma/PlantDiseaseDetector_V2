@@ -1,16 +1,72 @@
-# Node
-node_modules/
+# ----------------------
+# SISTEMA OPERATIVO (Archivos basura)
+# ----------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
 
-# Python
-venv/
-__pycache__/
-*.pyc
-
-# Environment
+# ----------------------
+# ENTORNOS Y SECRETOS (¡Crucial!)
+# ----------------------
 .env
-# IDE settings (Para que no se suban tus configs personales de VS Code)
+.env.local
+.env.*.local
+
+# ----------------------
+# IDE / EDITOR
+# ----------------------
 .vscode/
 .idea/
-# Data / Models
+*.swp
+*.swo
+
+# ----------------------
+# LOGS GENERALES
+# ----------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ----------------------
+# NODE.JS / FRONTEND (Vite/React)
+# ----------------------
+# Dependencias
+node_modules/
+
+# Builds de producción (Lo que genera npm run build)
+dist/
+build/
+
+# Testing y Cobertura
+coverage/
+
+# ----------------------
+# PYTHON / IA SERVICE
+# ----------------------
+# Archivos compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos Virtuales (Varios nombres comunes por seguridad)
+venv/
+env/
+.venv/
+/ia-service-python/venv/
+
+# Cache de pruebas
+.pytest_cache/
+.mypy_cache/
+
+# ----------------------
+# DATOS Y MODELOS (Pesados)
+# ----------------------
+# Evita subir datasets de imágenes (suelen pesar GBs)
 /dataset/
-/ia-service-python/models/
+
+# Ignorar modelos pesados
+*.pkl
+*.h5
+*.pt
+ia-service-python/models/
