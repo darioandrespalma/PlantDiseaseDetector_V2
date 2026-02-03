@@ -7,6 +7,7 @@ import LandingPage from '@/features/dashboard/pages/LandingPage';
 import DashboardHome from '@/features/dashboard/pages/DashboardHome';
 import NewPredictionPage from '@/features/detection/pages/NewPredictionPage';
 import NewsPage from '@/features/dashboard/pages/NewsPage';
+import MyLotsPage from '@/features/dashboard/pages/MyLotsPage';
 
 // Guards
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -48,6 +49,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <NewPredictionPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/lotes',
+    element: (
+      <ProtectedRoute>
+        <MyLotsPage />
       </ProtectedRoute>
     ),
   },

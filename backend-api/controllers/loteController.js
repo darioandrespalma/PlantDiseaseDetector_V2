@@ -1,193 +1,138 @@
 const Lote = require('../models/Lote');
-const Cultivo = require('../models/Cultivo');
-const DailyRecommendation = require('../models/DailyRecommendation');
-const Task = require('../models/Task'); // Asumo que tienes un modelo Task
+const Cultivo = require('../models/Cultivo'); // Asegúrate que este modelo exista
+const Task = require('../models/Task'); 
 
-// ✅ 1. Obtener todos los lotes del usuario (Faltaba esta función)
-exports.obtenerLotes = async (req, res) => {
+// ✅ 1. Obtener Lotes Inteligentes (Filtrados por Finca)
+exports.obtenerLotesConRecomendaciones = async (req, res) => {
   try {
-    // Busca lotes activos que pertenezcan al usuario logueado (req.user._id)
-    const lotes = await Lote.find({ 
-      usuario: req.user._id, 
-      activo: true 
-    })
-    .populate('cultivo', 'nombre') // Traer el nombre del cultivo
-    .sort({ createdAt: -1 });
+    const { farmId } = req.query; // Recibimos el ID de la finca actual desde el Frontend
 
-    res.json({ success: true, data: lotes });
+    if (!farmId) {
+        return res.status(400).json({ success: false, error: 'Se requiere farmId' });
+    }
+
+    // Buscamos lotes de ESA finca y ESE usuario
+    const lotes = await Lote.find({ 
+        user: req.user._id, 
+        farm: farmId,
+        activo: true 
+    }).populate('cultivoData'); // Traemos la info del catálogo agronómico
+
+    const lotesConData = lotes.map(lote => {
+      const loteObj = lote.toObject();
+      const cultivo = lote.cultivoData;
+      
+      // A. Calcular Edad Fenológica
+      const diasEdad = Math.floor((new Date() - new Date(lote.fechaSiembra)) / (1000 * 60 * 60 * 24));
+      
+      // B. Motor de Recomendaciones (Simulado con lógica real)
+      // En producción, aquí consultarías una API de clima real para la ubicación de la finca
+      const climaSimulado = { lluvia: 0, temp: 28 }; // Ejemplo: Sequía
+      const recomendaciones = [];
+
+      if (cultivo) {
+          // Regla 1: Riego
+          if (climaSimulado.lluvia < (cultivo.lluviaMinima || 10)) {
+             recomendaciones.push({
+                tipo: 'riego',
+                mensaje: `Déficit hídrico (Edad: ${diasEdad} días)`,
+                accionSugerida: `Riego suplementario recomendado para ${cultivo.nombre}.`,
+                prioridad: 'alta'
+             });
+          }
+      }
+
+      return {
+        ...loteObj,
+        edadDias: diasEdad,
+        recomendacionesDelDia: recomendaciones
+      };
+    });
+
+    res.json({ success: true, data: lotesConData });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Error al obtener los lotes' });
+    console.error("Error obtenerLotes:", error);
+    res.status(500).json({ success: false, error: 'Error del servidor' });
   }
 };
 
-// ✅ 2. Crear nuevo lote (Tu código actualizado con Alertas y Ubicación)
+// ✅ 2. Crear Nuevo Lote (Vinculado a Finca)
 exports.crearLote = async (req, res) => {
   try {
-    const { 
-      nombre, 
-      cultivoId, 
-      lat, 
-      lon, 
-      alertasActivas, 
-      frecuenciaAlertas 
-    } = req.body;
+    // Recibimos farmId del body
+    const { farmId, nombre, cultivoId, area, fechaSiembra, lat, lon } = req.body;
+
+    if (!farmId || !cultivoId) {
+        return res.status(400).json({ success: false, message: "Faltan datos obligatorios (Finca o Cultivo)" });
+    }
 
     const nuevoLote = new Lote({
+      user: req.user._id,
+      farm: farmId,
+      cultivoData: cultivoId,
       nombre,
-      usuario: req.user._id, // Viene del authMiddleware
-      cultivo: cultivoId,
-      ubicacion: {
-        lat,
-        lon
-      },
-      alertasClima: {
-        activas: alertasActivas || false,
-        frecuencia: frecuenciaAlertas || 'semanal'
-      },
+      area: area || 1,
+      fechaSiembra: fechaSiembra || new Date(),
+      ubicacion: { lat, lon },
       historial: [{
         tipo: 'nota',
-        titulo: 'Finca Creada',
-        descripcion: 'Registro inicial en el sistema.'
+        titulo: 'Creación',
+        descripcion: 'Lote registrado en el sistema.'
       }]
     });
     
     await nuevoLote.save();
-    res.status(201).json({ success: true, data: nuevoLote, message: 'Finca registrada correctamente' });
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ success: false, error: 'Error al crear la finca. Verifica los datos.' });
-  }
-};
-
-// ✅ 3. Agregar Evento al Historial (Faltaba esta función)
-exports.agregarEvento = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { tipo, titulo, descripcion } = req.body;
-
-    const lote = await Lote.findOne({ _id: id, usuario: req.user._id });
     
-    if (!lote) {
-      return res.status(404).json({ success: false, error: 'Lote no encontrado o no autorizado' });
-    }
-
-    lote.historial.push({
-      tipo,
-      titulo,
-      descripcion,
-      fecha: new Date()
-    });
-
-    await lote.save(); // Esto dispara el pre('save') del modelo para actualizar el semáforo
-    res.json({ success: true, message: 'Evento agregado', data: lote });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Error al registrar evento' });
-  }
-};
-
-// ✅ 4. Eliminar Lote (Borrado lógico) (Faltaba esta función)
-exports.eliminarLote = async (req, res) => {
-  try {
-    const { id } = req.params;
+    // Devolvemos el lote populado para que el frontend lo muestre bonito de una vez
+    const lotePoblado = await Lote.findById(nuevoLote._id).populate('cultivoData');
     
-    // Solo marcamos activo: false, no lo borramos de la BD
-    await Lote.findOneAndUpdate(
-      { _id: id, usuario: req.user._id },
-      { activo: false }
-    );
+    res.status(201).json({ success: true, data: lotePoblado, message: 'Lote creado exitosamente' });
 
-    res.json({ success: true, message: 'Lote eliminado correctamente' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Error al eliminar lote' });
+    console.error("Error crearLote:", error);
+    res.status(400).json({ success: false, error: error.message });
   }
 };
 
-exports.obtenerLotesConRecomendaciones = async (req, res) => {
-  try {
-    const lotes = await Lote.find({ usuario: req.user._id, activo: true })
-      .populate('cultivo');
-
-    // Array enriquecido
-    const lotesConData = [];
-
-    for (let lote of lotes) {
-      // 1. Simulación rápida de clima (Aquí conectarías OpenWeatherApi en producción)
-      const climaHoy = { temp: 24, lluvia: 0, humedad: 40 }; // Ejemplo: Día seco y caluroso
-      
-      // 2. GENERAR RECOMENDACIONES EN TIEMPO REAL (O buscarlas de la BD si ya existen hoy)
-      // Por simplicidad, las generamos al vuelo para este demo:
-      const recomendaciones = [];
-
-      // Lógica de Riego
-      if (climaHoy.lluvia < lote.cultivo.lluviaMinima) {
-         recomendaciones.push({
-            tipo: 'riego',
-            mensaje: `Baja precipitación detectada (${climaHoy.lluvia}mm).`,
-            accionSugerida: 'Activar riego por 45 minutos hoy en la tarde.',
-            estado: 'pendiente'
-         });
-      }
-
-      // Lógica de Temperatura
-      if (climaHoy.temp > lote.cultivo.tempOptima.max) {
-         recomendaciones.push({
-            tipo: 'general',
-            mensaje: `Ola de calor (${climaHoy.temp}°C).`,
-            accionSugerida: 'Revisar humedad del suelo y proteger plántulas jóvenes.',
-            estado: 'pendiente'
-         });
-      }
-
-      lotesConData.push({
-        ...lote.toObject(),
-        recomendacionesDelDia: recomendaciones
-      });
-    }
-
-    res.json({ success: true, data: lotesConData });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Error analizando lotes' });
-  }
-};
-
-// ✅ NUEVA FUNCIÓN: Aceptar Recomendación -> Convertir en Tarea
+// ✅ 3. Aceptar Recomendación (Convertir a Tarea)
 exports.aceptarRecomendacion = async (req, res) => {
   try {
     const { loteId, mensaje, accion } = req.body;
     
-    // Crear la tarea automáticamente
+    // Validamos que el lote exista
+    const lote = await Lote.findById(loteId);
+    if(!lote) return res.status(404).json({message: "Lote no encontrado"});
+
     const nuevaTarea = new Task({
-      user: req.user._id, // Asegúrate que tu modelo Task use 'user' o 'usuario'
-      title: `Auto: ${mensaje}`, // Ej: Auto: Baja precipitación...
-      description: accion,
+      user: req.user._id,
+      farm: lote.farm, // Asignamos la tarea a la misma finca del lote
+      title: `Auto: ${mensaje}`,
+      description: `${accion} en lote ${lote.nombre}`,
       status: 'pending',
       date: new Date(),
-      priority: 'high'
+      priority: 'high',
+      type: 'riego' // Por defecto, o dinámico según el mensaje
     });
 
     await nuevaTarea.save();
+    res.json({ success: true, message: 'Tarea generada', tarea: nuevaTarea });
 
-    res.json({ success: true, message: 'Tarea creada automáticamente', tarea: nuevaTarea });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Error creando tarea' });
   }
 };
 
-// ✅ NUEVA FUNCIÓN: Eliminar Lote
+// ✅ 4. Eliminar Lote
 exports.eliminarLote = async (req, res) => {
   try {
-    await Lote.findByIdAndUpdate(req.params.id, { activo: false });
-    res.json({ success: true, message: 'Lote eliminado' });
+    await Lote.findOneAndUpdate(
+        { _id: req.params.id, user: req.user._id }, 
+        { activo: false }
+    );
+    res.json({ success: true, message: 'Lote archivado' });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Error eliminando lote' });
   }
 };
-
-
-
