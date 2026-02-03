@@ -1,34 +1,37 @@
 const mongoose = require('mongoose');
 
-const loteSchema = new mongoose.Schema({
-  // ... (tus campos existentes: nombre, usuario, cultivo, etc.)
-  nombre: { type: String, required: true, trim: true },
-  usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  cultivo: { type: mongoose.Schema.Types.ObjectId, ref: 'Cultivo', required: true },
+const LoteSchema = new mongoose.Schema({
+  // 1. Vinculación Jerárquica (CRÍTICO)
+  farm: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Farm', 
+    required: true // Todo lote debe pertenecer a una finca
+  },
+  user: { // Mantenemos referencia al usuario por facilidad de consulta
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
+  },
   
-  ubicacion: {
-    lat: { type: Number, required: true },
-    lon: { type: Number, required: true },
-    provincia: { type: String, default: '' } // Nuevo campo útil para filtros
+  // 2. Vinculación Agronómica (El Cerebro)
+  cultivoData: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Cultivo', // Referencia al Catálogo Maestro (seedCultivos)
+    required: true 
   },
 
-  // ✅ NUEVA SECCIÓN: Configuración de Alertas
-  alertasClima: {
-    activas: { type: Boolean, default: false },
-    frecuencia: { 
-      type: String, 
-      enum: ['diaria', 'semanal', 'critica'], // 'critica' = solo si hay heladas/sequía
-      default: 'semanal' 
-    },
-    emailNotificacion: { type: String } // Opcional, por si quiere recibir en otro correo
-  },
-  // El semáforo de salud
+  nombre: { type: String, required: true, trim: true }, // Ej: "Sector Río"
+  area: { type: Number, required: true }, // Hectáreas del lote específico
+  fechaSiembra: { type: Date, default: Date.now }, // Para calcular edad del cultivo
+
+  // 3. Estado Fitosanitario (Semáforo)
   estadoSalud: {
     type: String,
     enum: ['saludable', 'riesgo', 'peligro'],
     default: 'saludable'
   },
-  // Bitácora de eventos (Riegos, Enfermedades, Cosechas)
+
+  // 4. Historial Operativo
   historial: [{
     tipo: {
       type: String,
@@ -37,36 +40,11 @@ const loteSchema = new mongoose.Schema({
     },
     titulo: String,
     descripcion: String,
-    fecha: {
-      type: Date,
-      default: Date.now
-    },
+    fecha: { type: Date, default: Date.now },
     fotoUrl: String
-  }],
-  activo: {
-    type: Boolean,
-    default: true
-  }
-}, { timestamps: true });
-
-// Middleware para actualizar el estadoSalud automáticamente basado en el historial
-loteSchema.pre('save', function(next) {
-  if (this.historial && this.historial.length > 0) {
-    // Ordenar historial por fecha descendente
-    const ultimosEventos = this.historial.sort((a, b) => b.fecha - a.fecha);
-    const ultimoEvento = ultimosEventos[0];
-
-    // Lógica básica de Semáforo
-    if (ultimoEvento.tipo === 'enfermedad') {
-      this.estadoSalud = 'peligro';
-    } else if (ultimoEvento.tipo === 'plaga') {
-      this.estadoSalud = 'riesgo';
-    } else if (['riego', 'fertilizante', 'nota'].includes(ultimoEvento.tipo)) {
-      // Si lo último fue cuidarlo, vuelve a saludable (puedes hacer lógica más compleja)
-      this.estadoSalud = 'saludable'; 
-    }
-  }
-  next();
+  }]
+}, { 
+  timestamps: true 
 });
 
-module.exports = mongoose.model('Lote', loteSchema);
+module.exports = mongoose.model('Lote', LoteSchema);

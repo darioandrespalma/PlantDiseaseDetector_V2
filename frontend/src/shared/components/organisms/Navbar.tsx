@@ -1,81 +1,68 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+// frontend/src/shared/components/organisms/Navbar.tsx
+import { useEffect } from 'react';
+import { useFarmStore } from '@/features/farms/farm.store';
+import { MapPin, ChevronDown, PlusCircle, Bell, User } from 'lucide-react';
 
 export default function Navbar() {
-  const [top, setTop] = useState<boolean>(true);
+  const { farms, currentFarm, setCurrentFarm, fetchFarms } = useFarmStore();
 
-  // Lógica para detectar el scroll y cambiar la transparencia
   useEffect(() => {
-    const scrollHandler = () => {
-      window.scrollY > 10 ? setTop(false) : setTop(true);
-    };
-    window.addEventListener('scroll', scrollHandler);
-    return () => window.removeEventListener('scroll', scrollHandler);
+    fetchFarms();
   }, []);
 
   return (
-    <nav className={`fixed w-full z-50 top-0 transition-all duration-300 ease-in-out ${
-      !top ? 'bg-slate-900/80 backdrop-blur-lg border-b border-slate-800/50 shadow-lg shadow-black/5' : 'bg-transparent border-transparent'
-    }`}>
-      <div className="max-w-7xl mx-auto px-5 sm:px-6">
-        <div className="flex items-center justify-between h-20">
+    // Se quita el 'justify-between' para que el selector quede a la izquierda
+    <nav className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl px-6 flex items-center sticky top-0 z-50">
+      
+      {/* ❌ SE ELIMINÓ EL BLOQUE DEL LOGO AQUÍ ❌ */}
 
-          {/* LOGO & BRANDING */}
-          <div className="flex-shrink-0 mr-4">
-            <Link to="/" className="block group" aria-label="PlantDiseaseDetector">
-              <div className="flex items-center gap-3">
-                 {/* Contenedor del Logo con efecto Hover */}
-                 <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/50 border border-slate-700/50 group-hover:border-purple-500/50 group-hover:bg-purple-900/10 transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-                    <img 
-                        src="/logo.svg" 
-                        alt="Logo" 
-                        className="w-6 h-6 transition-transform duration-500 ease-out group-hover:rotate-12" 
-                    />
-                 </div>
-                 
-                 {/* Texto con Gradiente */}
-                 <div className="flex flex-col leading-none">
-                    <span className="text-white font-extrabold text-xl tracking-tight transition-colors duration-300">
-                        Plant
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-400 animate-gradient-x">
-                            Disease
-                        </span>
-                    </span>
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-semibold group-hover:text-purple-400 transition-colors duration-300">
-                        Detector AI
-                    </span>
-                 </div>
+      {/* --- FARM SWITCHER (SELECTOR DE FINCAS) --- */}
+      {/* Se quita el margen izquierdo 'mx-6' y se pone 'mr-auto' para empujarlo a la izquierda */}
+      <div className="max-w-xs mr-auto"> 
+        {farms.length > 0 ? (
+          <div className="relative group">
+            <div className="flex items-center gap-3 bg-slate-800/50 border border-slate-700 hover:border-emerald-500/50 rounded-xl px-3 py-1.5 transition-all cursor-pointer">
+              <div className="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-400">
+                <MapPin size={16} />
               </div>
-            </Link>
+              
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Finca Activa</p>
+                <div className="text-sm font-semibold text-white flex items-center justify-between gap-2">
+                  <span className="truncate">{currentFarm?.nombre || 'Seleccionar...'}</span>
+                  <ChevronDown size={14} className="text-slate-500" />
+                </div>
+              </div>
+
+              <select 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                value={currentFarm?._id || ''}
+                onChange={(e) => setCurrentFarm(e.target.value)}
+              >
+                {farms.map(farm => (
+                  <option key={farm._id} value={farm._id}>
+                    {farm.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+        ) : (
+          <div className="text-xs text-slate-400 flex items-center gap-2 bg-slate-800/30 px-3 py-2 rounded-lg border border-dashed border-slate-700 animate-pulse">
+            <PlusCircle size={14} />
+            <span>Configuración pendiente</span>
+          </div>
+        )}
+      </div>
 
-          {/* NAVEGACIÓN DESKTOP */}
-          <nav className="flex flex-grow">
-            <ul className="flex flex-grow justify-end flex-wrap items-center gap-4">
-              <li>
-                <Link 
-                    to="/login" 
-                    className="font-medium text-slate-300 hover:text-white px-5 py-2 rounded-full hover:bg-white/5 transition-all duration-200"
-                >
-                  Sign in
-                </Link>
-              </li>
-              <li>
-                <Link 
-                    to="/register" 
-                    className="relative inline-flex items-center justify-center px-6 py-2 overflow-hidden font-medium text-white transition duration-300 ease-out border border-purple-500 rounded-full shadow-md group"
-                >
-                  {/* Efecto de relleno al hover */}
-                  <span className="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-purple-600 group-hover:translate-x-0 ease">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                  </span>
-                  <span className="absolute flex items-center justify-center w-full h-full text-white transition-all duration-300 transform group-hover:translate-x-full ease">Register</span>
-                  <span className="relative invisible">Register</span>
-                </Link>
-              </li>
-            </ul>
-          </nav>
-
+      {/* RIGHT ACTIONS (Se mantienen a la derecha) */}
+      <div className="flex items-center gap-4">
+        <button className="text-slate-400 hover:text-white transition-colors relative">
+          <Bell size={20} />
+          <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div className="h-8 w-8 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 text-slate-400">
+          <User size={16} />
         </div>
       </div>
     </nav>

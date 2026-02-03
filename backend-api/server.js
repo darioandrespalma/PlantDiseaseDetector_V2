@@ -15,20 +15,21 @@ const cultivoController = require('./controllers/cultivoController');
 const authRoutes = require('./routes/auth');
 const predictRoutes = require('./routes/predict');
 const climateRoutes = require('./routes/climate');
-const loteRoutes = require('./routes/lotes'); // ✅ Solo una vez
-const taskRoutes = require('./routes/tasks');      
+const loteRoutes = require('./routes/lotes');
+const taskRoutes = require('./routes/tasks');       
 const dashboardRoutes = require('./routes/dashboard');
 const newsRoutes = require('./routes/news');
-const Bulletin = require('./models/Bulletin'); // Modelo para ruta inline
+const farmRoutes = require('./routes/farmRoutes');
+const Bulletin = require('./models/Bulletin'); 
 
 // --- Configuración Inicial ---
 const app = express();
 const httpServer = http.createServer(app); 
 
-// 🟢 CONFIGURACIÓN PUERTO: Usa el del .env (3000)
+// 🟢 CONFIGURACIÓN PUERTO
 const PORT = process.env.PORT || 3000;
 
-// 🟢 CORS ROBUSTO: Permite Angular en localhost y 127.0.0.1
+// 🟢 CORS ROBUSTO
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:4200',
@@ -79,8 +80,9 @@ app.use('/api/lotes', loteRoutes);
 app.use('/api/tasks', taskRoutes);         
 app.use('/api/dashboard', dashboardRoutes); 
 app.use('/api/news', newsRoutes);
+app.use('/api/farms', farmRoutes); // ✅ 2. AGREGAR EL ENDPOINT DE FINCAS
 
-// ✅ RUTA CULTIVOS (Necesaria para el selector del mapa)
+// ✅ RUTA CULTIVOS
 const routerCultivos = express.Router();
 routerCultivos.get('/', cultivoController.obtenerCultivos);
 app.use('/api/cultivos', routerCultivos);
@@ -101,7 +103,11 @@ app.get('/', (req, res) => {
 });
 
 // --- Cron Jobs ---
-require('./jobs/recomendacionJob'); 
+try {
+    require('./jobs/recomendacionJob');
+} catch (e) {
+    console.warn('⚠️ No se pudo cargar jobs/recomendacionJob (Verificar ruta)');
+}
 
 // --- Manejo de Errores Global ---
 app.use((err, req, res, next) => {
@@ -110,10 +116,10 @@ app.use((err, req, res, next) => {
 });
 
 // --- Iniciar Servidor ---
-// Escuchamos en 0.0.0.0 para asegurar visibilidad en la red local
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`=================================`);
   console.log(`🚀 Servidor corriendo en puerto: ${PORT}`);
   console.log(`🔗 Orígenes permitidos: ${allowedOrigins.join(', ')}`);
+  console.log(`🌾 API Fincas: ACTIVA en /api/farms`);
   console.log(`=================================`);
 });
