@@ -1,11 +1,11 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/shared/store/auth.store';
-
 // Pages
 import LoginPage from '@/features/auth/pages/LoginPage';
 import RegisterPage from '@/features/auth/pages/RegisterPage';
 import LandingPage from '@/features/dashboard/pages/LandingPage';
-import DashboardHome from '@/features/dashboard/pages/DashboardHome'; // Importar Dashboard
+import DashboardHome from '@/features/dashboard/pages/DashboardHome';
+import NewPredictionPage from '@/features/detection/pages/NewPredictionPage';
 
 // Guards
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -19,6 +19,7 @@ const PublicRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 export const router = createBrowserRouter([
+  // --- RUTAS PÚBLICAS ---
   {
     path: '/',
     element: <PublicRoute><LandingPage /></PublicRoute>, 
@@ -31,15 +32,26 @@ export const router = createBrowserRouter([
     path: '/register',
     element: <PublicRoute><RegisterPage /></PublicRoute>,
   },
+
+  // --- RUTAS PROTEGIDAS (Solo usuarios logueados) ---
   {
-    path: '/dashboard', // Ruta protegida
+    path: '/dashboard',
     element: (
       <ProtectedRoute>
-        {/* El Layout ya está dentro de DashboardHome, pero si prefieres separarlo puedes hacerlo */}
         <DashboardHome />
       </ProtectedRoute>
     ),
   },
+  {
+    path: '/nueva-prediccion', // 🔒 AHORA ESTÁ PROTEGIDA
+    element: (
+      <ProtectedRoute>
+        <NewPredictionPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  // --- RUTAS DE MANTENIMIENTO ---
   {
     path: '*',
     element: <Navigate to="/" replace />,
