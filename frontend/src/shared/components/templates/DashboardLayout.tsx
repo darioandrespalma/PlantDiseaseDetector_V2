@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Sprout, ScanEye, LogOut, Settings, Leaf } from 'lucide-react';
+import { LayoutDashboard, Sprout, ScanEye, LogOut, Settings, Leaf, Scale3D } from 'lucide-react';
 import { useAuthStore } from '@/shared/store/auth.store';
 import GridPattern from '../ui/GridPattern';
 
@@ -16,6 +16,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: LayoutDashboard, label: 'Resumen', path: '/dashboard' },
     { icon: Sprout, label: 'Mis Lotes', path: '/dashboard/lotes' },
     { icon: ScanEye, label: 'Nueva Predicción', path: '/dashboard/predict' },
+    
+    { icon: Scale3D, label: 'Noticias', path: 'dashboard/news' },
     { icon: Settings, label: 'Configuración', path: '/dashboard/settings' },
   ];
 

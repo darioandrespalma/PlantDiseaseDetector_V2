@@ -1,45 +1,56 @@
 const Lote = require('../models/Lote');
 const Prediction = require('../models/Prediction');
-// Asegúrate de que matchingEngine exista, si no, comenta las líneas de fase lunar temporalmente
-const matchingEngine = require('../services/matchingEngine'); 
+const recommendationEngine = require('../services/recommendationEngine'); // Importar el nuevo servicio
 
 exports.getDashboardSummary = async (req, res) => {
   try {
     const userId = req.user._id;
-
-    // 1. Fase Lunar (Calculada o Simulada)
-    const faseLunar = matchingEngine ? matchingEngine.calcularFaseLunar(new Date()) : 'creciente';
     
-    // 2. Resumen de Lotes
-    const lotes = await Lote.find({ user: userId });
-    const totalLotes = lotes.length;
-    // Asumiendo que 'estadoSalud' puede ser 'saludable', 'riesgo', 'enfermo'
-    const lotesEnRiesgo = lotes.filter(l => l.estadoSalud !== 'saludable').length;
+    // 1. Obtener coordenadas del Query String (si el frontend las envía)
+    const { lat, lon } = req.query;
 
-    // 3. Última predicción
-    const ultimaPrediccion = await Prediction.findOne({ user: userId })
-      .sort({ createdAt: -1 })
-      .select('crop prediction confidence createdAt');
+    // 2. Ejecutar lógica en paralelo (Base de Datos + API Clima)
+    const [totalLotes, lotesEnRiesgo, ultimaPrediccion, recomendacion] = await Promise.all([
+      Lote.countDocuments({ user: userId }),
+      Lote.countDocuments({ user: userId, estadoSalud: { $ne: 'saludable' } }),
+      Prediction.findOne({ user: userId }).sort({ createdAt: -1 }).lean(),
+      // Llamamos al motor de recomendación con las coordenadas
+      recommendationEngine.getAdvice(lat, lon) 
+    ]);
+
+    // 3. Armar respuesta segura
+    const nombreUsuario = req.user.username || (req.user.email ? req.user.email.split('@')[0] : 'Agricultor');
 
     res.json({
       success: true,
       data: {
-        usuario: req.user.username,
+        usuario: nombreUsuario,
+        clima: {
+          ubicacion: recomendacion.location,
+          temp: recomendacion.temp,
+          descripcion: recomendacion.weatherDesc,
+        },
         lunar: {
-          fase: faseLunar,
-          mensaje: "Fase lunar actual calculada."
+          fase: recomendacion.lunarPhase,
+          mensaje: recomendacion.advice
         },
         estadisticas: {
           totalLotes,
-          lotesSanos: totalLotes - lotesEnRiesgo,
+          lotesSanos: Math.max(0, totalLotes - lotesEnRiesgo),
           lotesAlerta: lotesEnRiesgo,
         },
-        actividadReciente: ultimaPrediccion
+        actividadReciente: ultimaPrediccion ? {
+            crop: ultimaPrediccion.crop,
+            prediction: ultimaPrediccion.prediction,
+            confidence: Number(ultimaPrediccion.confidence),
+            createdAt: ultimaPrediccion.createdAt
+        } : null
       }
     });
 
   } catch (error) {
-    console.error('Error Dashboard:', error);
-    res.status(500).json({ success: false, message: 'Error cargando dashboard' });
+    console.error('❌ Error Dashboard:', error);
+    // Enviar error 500 pero con estructura JSON válida
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
