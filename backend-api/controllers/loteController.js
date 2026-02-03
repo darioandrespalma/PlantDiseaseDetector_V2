@@ -22,8 +22,17 @@ exports.obtenerLotesConRecomendaciones = async (req, res) => {
       const loteObj = lote.toObject();
       const cultivo = lote.cultivoData;
       
-      // A. Calcular Edad Fenológica
-      const diasEdad = Math.floor((new Date() - new Date(lote.fechaSiembra)) / (1000 * 60 * 60 * 24));
+      const hoy = new Date();
+      const siembra = new Date(lote.fechaSiembra);
+
+      // Normalizamos ambas fechas a medianoche para ignorar horas/minutos
+      hoy.setHours(0,0,0,0);
+      siembra.setHours(0,0,0,0);
+
+      let diasEdad = Math.floor((hoy - siembra) / (1000 * 60 * 60 * 24));
+
+      // Si por error de zona horaria da -1, lo forzamos a 0
+      if (diasEdad < 0) diasEdad = 0;
       
       // B. Motor de Recomendaciones (Simulado con lógica real)
       // En producción, aquí consultarías una API de clima real para la ubicación de la finca
