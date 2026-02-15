@@ -1,4 +1,4 @@
-import { api } from '@/shared/lib/axios';
+import { api } from '@/lib/http/axios';
 
 export interface NewsArticle {
   id: string;

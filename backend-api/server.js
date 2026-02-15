@@ -1,17 +1,19 @@
+// backend-api/server.js
 require('dotenv').config(); 
 const express = require('express');
 const http = require('http'); 
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
 const morgan = require('morgan');
 const path = require('path');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
+const dailyJob = require('./jobs/dailyCheck');
 
-// --- Importación de Controladores ---
+// --- Importaciones ---
 const cultivoController = require('./controllers/cultivoController');
-
-// --- Importación de Rutas ---
 const authRoutes = require('./routes/auth');
 const predictRoutes = require('./routes/predict');
 const climateRoutes = require('./routes/climate');
@@ -25,22 +27,76 @@ const Bulletin = require('./models/Bulletin');
 // --- Configuración Inicial ---
 const app = express();
 const httpServer = http.createServer(app); 
-
-// 🟢 CONFIGURACIÓN PUERTO
 const PORT = process.env.PORT || 3000;
 
-// 🟢 CORS ROBUSTO
+// ==========================================
+// 1. CORS (CRÍTICO: DEBE IR PRIMERO)
+// ==========================================
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:4200',
-  'http://127.0.0.1:4200',
+  'http://127.0.0.1:5173',
   process.env.FRONTEND_URL
-].filter(Boolean);
+];
 
-// --- Conexión a Base de Datos ---
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('🚫 Origen bloqueado por CORS:', origin);
+      callback(new Error('No permitido por CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// ==========================================
+// 2. PARSEO Y LOGS (Lectura de datos)
+// ==========================================
+// MOVIDO AQUÍ: Necesitamos leer los datos antes de sanitizarlos
+app.use(morgan('dev')); 
+app.use(express.json({ limit: '10kb' })); 
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ==========================================
+// 3. SEGURIDAD (Sanitización y Protección)
+// ==========================================
+
+// Helmet
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// ✅ MOVIDO AQUÍ (CORRECCIÓN DEL ERROR):
+// Ahora que express.json ya corrió, mongoSanitize puede leer y limpiar req.body y req.query sin romperse.
+// app.use(mongoSanitize());
+
+// Rate Limiter Global
+const globalLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, 
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use('/api', globalLimiter);
+
+// Rate Limiter Auth
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { success: false, message: 'Demasiados intentos. Bloqueado por 15 min.' }
+});
+
+// ==========================================
+// 4. CONEXIONES (DB & SOCKETS)
+// ==========================================
 connectDB();
 
-// --- Configuración de Socket.IO ---
 const io = new Server(httpServer, {
   cors: {
     origin: allowedOrigins,
@@ -48,10 +104,8 @@ const io = new Server(httpServer, {
     credentials: true
   }
 });
-
 app.set('io', io);
 
-// Eventos de WebSockets
 io.on('connection', (socket) => {
   console.log(`🔌 Cliente conectado: ${socket.id}`);
   socket.on('join_room', (userId) => {
@@ -59,35 +113,22 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- Middlewares Globales ---
-app.use(helmet({ crossOriginResourcePolicy: false })); 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
-app.use(morgan('dev')); 
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true }));
-
-// --- Archivos Estáticos ---
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// --- Definición de Endpoints (API) ---
-app.use('/api/auth', authRoutes);
+// ==========================================
+// 5. RUTAS
+// ==========================================
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/predict', predictRoutes); 
 app.use('/api/climate', climateRoutes);
 app.use('/api/lotes', loteRoutes);
 app.use('/api/tasks', taskRoutes);         
 app.use('/api/dashboard', dashboardRoutes); 
 app.use('/api/news', newsRoutes);
-app.use('/api/farms', farmRoutes); // ✅ 2. AGREGAR EL ENDPOINT DE FINCAS
+app.use('/api/farms', farmRoutes);
 
-// ✅ RUTA CULTIVOS
 const routerCultivos = express.Router();
 routerCultivos.get('/', cultivoController.obtenerCultivos);
 app.use('/api/cultivos', routerCultivos);
 
-// --- Ruta Boletín ---
 app.get('/api/bulletin', async (req, res) => {
   try {
     const news = await Bulletin.find().sort({ fechaPublicacion: -1 }).limit(10);
@@ -97,29 +138,28 @@ app.get('/api/bulletin', async (req, res) => {
   }
 });
 
-// --- Health Check ---
 app.get('/', (req, res) => {
-  res.send(`🌿 Plant Disease Detector V2 API - Running on Port ${PORT}`);
+  res.send(`🌿 Plant Disease Detector V2 API - Secured`);
 });
 
-// --- Cron Jobs ---
+// Cron Jobs
 try {
-    require('./jobs/recomendacionJob');
+    dailyJob.start(); 
+    console.log('✅ Cron Job de Análisis Diario: ACTIVADO');
 } catch (e) {
-    console.warn('⚠️ No se pudo cargar jobs/recomendacionJob (Verificar ruta)');
+    console.warn('⚠️ Error Cron:', e.message);
 }
 
-// --- Manejo de Errores Global ---
+// Error Handling
 app.use((err, req, res, next) => {
-  console.error('🔥 Error:', err.stack);
-  res.status(500).json({ success: false, message: 'Error interno', error: err.message });
+  console.error('🔥 Error Global:', err.stack);
+  res.status(500).json({ success: false, message: 'Error interno del servidor', error: err.message });
 });
 
-// --- Iniciar Servidor ---
+// Start
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`=================================`);
-  console.log(`🚀 Servidor corriendo en puerto: ${PORT}`);
-  console.log(`🔗 Orígenes permitidos: ${allowedOrigins.join(', ')}`);
-  console.log(`🌾 API Fincas: ACTIVA en /api/farms`);
+  console.log(`🚀 Servidor Seguro en puerto: ${PORT}`);
+  console.log(`🔗 CORS habilitado para: ${allowedOrigins.join(', ')}`);
   console.log(`=================================`);
 });

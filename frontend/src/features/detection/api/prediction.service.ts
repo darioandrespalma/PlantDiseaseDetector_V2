@@ -1,5 +1,5 @@
 // src/features/detection/api/prediction.service.ts
-import { api } from '@/shared/lib/axios';
+import { api } from '@/lib/http/axios';
 
 export interface PredictionResult {
   _id: string;

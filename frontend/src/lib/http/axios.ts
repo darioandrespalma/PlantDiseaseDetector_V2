@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { useAuthStore } from '@/shared/store/auth.store';
+import { useAuthStore } from '@/store/auth.store';
 
-// Usa localhost:3000 según tu backend express
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export const api = axios.create({
@@ -9,16 +8,21 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Interceptor: Inyectar Token automáticamente
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
+
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // ✅ asegura que headers exista
+    config.headers = config.headers ?? {};
+    (config.headers as any).Authorization = `Bearer ${token}`;
   }
+
+  // ✅ debug temporal (puedes borrarlo luego)
+  // console.log('[REQ]', config.method, config.url, 'token?', !!token);
+
   return config;
 });
 
-// Interceptor: Manejo de errores (Logout si expira sesión)
 api.interceptors.response.use(
   (response) => response,
   (error) => {

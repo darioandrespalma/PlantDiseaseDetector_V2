@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/shared/components/templates/DashboardLayout';
-import { useFarmStore } from '@/features/farms/farm.store';
-import { lotsService, Lote } from '@/features/farms/lots.service';
+import { useFarmStore } from '@/features/farms/store/farm.store';
+import { lotsService, Lote } from '@/features/farms/api/lots.service';
 import FarmMap from '../components/FarmMap';
 import { Sprout, Plus, MapPin, AlertTriangle, Droplets } from 'lucide-react';
 

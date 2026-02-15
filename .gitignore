@@ -1,72 +1,75 @@
-# ----------------------
-# SISTEMA OPERATIVO (Archivos basura)
-# ----------------------
+# ===========================
+# 1. SISTEMA Y EDITORES
+# ===========================
 .DS_Store
 Thumbs.db
-Desktop.ini
+.vscode/
+.idea/
+*.log
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
-# ----------------------
-# ENTORNOS Y SECRETOS (¡Crucial!)
-# ----------------------
+# ===========================
+# 2. SEGURIDAD (¡CRÍTICO!)
+# ===========================
+# Ignora todos los archivos de entorno en cualquier carpeta
 .env
 .env.local
 .env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Excepción: Si tienes un archivo de ejemplo, ese sí se sube
+!.env.example
 
-# ----------------------
-# IDE / EDITOR
-# ----------------------
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# ----------------------
-# LOGS GENERALES
-# ----------------------
-*.log
+# ===========================
+# 3. NODE.JS (Frontend y Backend)
+# ===========================
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# ----------------------
-# NODE.JS / FRONTEND (Vite/React)
-# ----------------------
-# Dependencias
-node_modules/
+# ===========================
+# 4. FRONTEND (React/Vite)
+# ===========================
+frontend/dist/
+frontend/build/
+frontend/coverage/
+frontend/*.local
 
-# Builds de producción (Lo que genera npm run build)
-dist/
-build/
+# ===========================
+# 5. BACKEND (Express)
+# ===========================
+# Ignora las fotos subidas, pero mantén la carpeta 'uploads'
+backend-api/uploads/*
+!backend-api/uploads/.gitkeep
+backend-api/coverage/
 
-# Testing y Cobertura
-coverage/
-
-# ----------------------
-# PYTHON / IA SERVICE
-# ----------------------
-# Archivos compilados
+# ===========================
+# 6. PYTHON / IA (Service)
+# ===========================
+# Archivos compilados y caché
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Entornos Virtuales (Varios nombres comunes por seguridad)
-venv/
-env/
-.venv/
-/ia-service-python/venv/
-
-# Cache de pruebas
 .pytest_cache/
-.mypy_cache/
 
-# ----------------------
-# DATOS Y MODELOS (Pesados)
-# ----------------------
-# Evita subir datasets de imágenes (suelen pesar GBs)
-/dataset/
+# Entornos virtuales (varios nombres comunes)
+venv/
+.venv/
+env/
+ia-service-python/venv/
 
-# Ignorar modelos pesados
-*.pkl
+# ===========================
+# 7. MODELOS DE IA (Pesados)
+# ===========================
+# GitHub bloquea archivos >100MB. Si tus modelos pesan menos, 
+# puedes comentar estas líneas con # para subirlos.
 *.h5
+*.pkl
 *.pt
-ia-service-python/models/
+*.keras

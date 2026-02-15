@@ -1,23 +1,40 @@
 // frontend/src/shared/components/organisms/Navbar.tsx
 import { useEffect } from 'react';
-import { useFarmStore } from '@/features/farms/farm.store';
-import { MapPin, ChevronDown, PlusCircle, Bell, User } from 'lucide-react';
+import { useFarmStore } from '@/features/farms/store/farm.store';
+// 1. Importamos el hook de autenticación (Ajusta la ruta si es diferente)
+import { useAuthStore } from '@/store/auth.store'; 
+import { MapPin, ChevronDown, PlusCircle, Bell, User, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { farms, currentFarm, setCurrentFarm, fetchFarms } = useFarmStore();
+  // 2. Obtenemos la función de logout del store (o limpiamos manualmente si no existe)
+  const logout = useAuthStore((state: any) => state.logout); 
 
   useEffect(() => {
-    fetchFarms();
+    // Protección: Solo cargar granjas si hay token (evita el error 401 si recargas)
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetchFarms();
+    }
   }, []);
 
+  // 3. Función para manejar el cierre de sesión
+  const handleLogout = () => {
+    // A) Si tienes método en el store:
+    if (logout) logout();
+    
+    // B) Limpieza manual de seguridad (Respaldo):
+    localStorage.removeItem('token');
+    localStorage.removeItem('user'); // Si guardas datos de usuario
+    
+    // C) Redirección forzada para limpiar estado de memoria
+    window.location.href = '/login';
+  };
+
   return (
-    // Se quita el 'justify-between' para que el selector quede a la izquierda
     <nav className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl px-6 flex items-center sticky top-0 z-50">
       
-      {/* ❌ SE ELIMINÓ EL BLOQUE DEL LOGO AQUÍ ❌ */}
-
-      {/* --- FARM SWITCHER (SELECTOR DE FINCAS) --- */}
-      {/* Se quita el margen izquierdo 'mx-6' y se pone 'mr-auto' para empujarlo a la izquierda */}
+      {/* --- FARM SWITCHER (IZQUIERDA) --- */}
       <div className="max-w-xs mr-auto"> 
         {farms.length > 0 ? (
           <div className="relative group">
@@ -55,15 +72,31 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* RIGHT ACTIONS (Se mantienen a la derecha) */}
-      <div className="flex items-center gap-4">
-        <button className="text-slate-400 hover:text-white transition-colors relative">
+      {/* --- RIGHT ACTIONS (DERECHA) --- */}
+      <div className="flex items-center gap-3">
+        {/* Notificaciones */}
+        <button className="text-slate-400 hover:text-white transition-colors relative p-2">
           <Bell size={20} />
-          <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
         </button>
-        <div className="h-8 w-8 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 text-slate-400">
+        
+        {/* Separador vertical visual */}
+        <div className="h-6 w-px bg-slate-800 mx-1"></div>
+
+        {/* Perfil (Solo visual por ahora) */}
+        <div className="h-8 w-8 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 text-slate-400 cursor-default">
           <User size={16} />
         </div>
+
+        {/* --- BOTÓN DE SALIR (NUEVO) --- */}
+        <button 
+            onClick={handleLogout}
+            title="Cerrar Sesión"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20 group"
+        >
+            <span className="text-sm font-medium hidden sm:block group-hover:text-red-400">Salir</span>
+            <LogOut size={18} />
+        </button>
       </div>
     </nav>
   );

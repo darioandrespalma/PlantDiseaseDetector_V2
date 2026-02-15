@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
 import AuthLayout from '@/shared/components/templates/AuthLayout';
-import { useAuthStore } from '@/shared/store/auth.store';
+import { useAuthStore } from '@/store/auth.store';
 import { authService } from '../api/auth.service';
 import { loginSchema, LoginFormValues } from '../types/auth.types';
 

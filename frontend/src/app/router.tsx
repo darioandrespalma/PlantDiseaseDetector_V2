@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { useAuthStore } from '@/shared/store/auth.store';
+import { useAuthStore } from '@/store/auth.store';
 // Pages
 import LoginPage from '@/features/auth/pages/LoginPage';
 import RegisterPage from '@/features/auth/pages/RegisterPage';
