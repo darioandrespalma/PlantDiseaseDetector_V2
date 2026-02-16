@@ -10,6 +10,7 @@ import NewsPage from '@/features/dashboard/pages/NewsPage';
 import MyLotsPage from '@/features/dashboard/pages/MyLotsPage';
 import ForgotPasswordPage from '@/features/auth/pages/ForgotPasswordPage';
 import ResetPasswordPage from '@/features/auth/pages/ResetPasswordPage';
+import CalendarPage from '@/features/dashboard/pages/CalendarPage';
 
 // Guards
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -51,6 +52,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <DashboardHome />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/calendario', // ✅ Nueva Ruta
+    element: (
+      <ProtectedRoute>
+        <CalendarPage />
       </ProtectedRoute>
     ),
   },

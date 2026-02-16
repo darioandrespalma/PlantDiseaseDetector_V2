@@ -300,7 +300,7 @@ export default function DashboardHome() {
               <CalendarClock size={18} className="text-blue-400" />
               Agenda Hoy
             </h3>
-            <Link to="/tareas" className="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Calendario</Link>
+            <Link to="/calendario" className="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Calendario</Link>
           </div>
 
           <div className="flex-1 flex flex-col gap-3">
