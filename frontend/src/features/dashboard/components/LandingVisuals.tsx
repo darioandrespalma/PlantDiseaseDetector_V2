@@ -28,47 +28,7 @@ export const IconCloud = () => (
 );
 
 /* ---------------------------------------------------------
-   IMAGEN HERO PRINCIPAL (SVG)
---------------------------------------------------------- */
-
-export const HeroImageSVG = () => (
-  <svg viewBox="0 0 800 500" className="w-full h-full drop-shadow-2xl">
-    <defs>
-      <linearGradient id="screen-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#1e293b" stopOpacity="0.8"/>
-        <stop offset="100%" stopColor="#0f172a" stopOpacity="0.9"/>
-      </linearGradient>
-      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-      </pattern>
-    </defs>
-    
-    <rect x="50" y="20" width="700" height="460" rx="20" fill="url(#screen-grad)" stroke="#334155" strokeWidth="2"/>
-    <rect x="50" y="20" width="700" height="460" rx="20" fill="url(#grid)" />
-
-    <rect x="90" y="60" width="150" height="40" rx="8" fill="rgba(124, 58, 237, 0.2)" />
-    <rect x="90" y="120" width="200" height="10" rx="5" fill="rgba(255,255,255,0.1)" />
-    <rect x="90" y="140" width="140" height="10" rx="5" fill="rgba(255,255,255,0.1)" />
-
-    <path transform="translate(350, 150) scale(4)" d="M12 2C7.5 2 4 6 4 11C4 16.5 8 21 12 22C16 21 20 16.5 20 11C20 6 16.5 2 12 2ZM12 20C9.5 19 6 15.5 6 11C6 7.5 8.5 4 12 4C15.5 4 18 7.5 18 11C18 15.5 14.5 19 12 20Z" fill="#4ade80" opacity="0.8" />
-    
-    <line x1="250" y1="100" x2="550" y2="100" stroke="#a855f7" strokeWidth="2" className="animate-[scan_3s_ease-in-out_infinite]">
-        <animate attributeName="y1" values="100;400;100" dur="4s" repeatCount="indefinite" />
-        <animate attributeName="y2" values="100;400;100" dur="4s" repeatCount="indefinite" />
-    </line>
-    
-    <g transform="translate(500, 300)">
-        <rect width="180" height="100" rx="10" fill="rgba(15, 23, 42, 0.9)" stroke="#4ade80" strokeWidth="1" />
-        <text x="20" y="30" fill="white" fontFamily="sans-serif" fontSize="14" fontWeight="bold">Diagnosis:</text>
-        <text x="20" y="55" fill="#4ade80" fontFamily="sans-serif" fontSize="18">Healthy</text>
-        <rect x="20" y="70" width="140" height="6" rx="3" fill="#334155" />
-        <rect x="20" y="70" width="130" height="6" rx="3" fill="#4ade80" />
-    </g>
-  </svg>
-);
-
-/* ---------------------------------------------------------
-   ICONOS DE CÓMO FUNCIONA (NUEVOS)
+   ICONOS DE CÓMO FUNCIONA (Steps)
 --------------------------------------------------------- */
 
 export const IconUpload = () => (
