@@ -71,7 +71,7 @@ export default function LoginPage() {
         <div className="space-y-2">
             <div className="flex justify-between items-center ml-1">
                 <label className="text-sm font-medium text-gray-300">Contraseña</label>
-                <Link to="#" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+                <Link to="/forgot-password" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
                     ¿Olvidaste tu contraseña?
                 </Link>
             </div>

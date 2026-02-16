@@ -8,6 +8,8 @@ import DashboardHome from '@/features/dashboard/pages/DashboardHome';
 import NewPredictionPage from '@/features/detection/pages/NewPredictionPage';
 import NewsPage from '@/features/dashboard/pages/NewsPage';
 import MyLotsPage from '@/features/dashboard/pages/MyLotsPage';
+import ForgotPasswordPage from '@/features/auth/pages/ForgotPasswordPage';
+import ResetPasswordPage from '@/features/auth/pages/ResetPasswordPage';
 
 // Guards
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -33,6 +35,14 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     element: <PublicRoute><RegisterPage /></PublicRoute>,
+  },
+  {
+    path: '/forgot-password',
+    element: <PublicRoute><ForgotPasswordPage /></PublicRoute>,
+  },
+  {
+    path: '/reset-password/:token',
+    element: <PublicRoute><ResetPasswordPage /></PublicRoute>,
   },
 
   // --- RUTAS PROTEGIDAS (Solo usuarios logueados) ---

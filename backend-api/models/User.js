@@ -16,12 +16,17 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    // --- AGREGAR ESTO ---
+    resetPasswordToken: { type: String },
+    resetPasswordExpire: { type: Date }
+    // --------------------
   },
   {
     timestamps: true,
   }
 );
 
+// ... (El resto de tu código: pre-save hash y matchPassword se queda IGUAL) ...
 // Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
@@ -31,7 +36,6 @@ userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Match password method
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

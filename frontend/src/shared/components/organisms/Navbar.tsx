@@ -1,40 +1,31 @@
 // frontend/src/shared/components/organisms/Navbar.tsx
 import { useEffect } from 'react';
 import { useFarmStore } from '@/features/farms/store/farm.store';
-// 1. Importamos el hook de autenticación (Ajusta la ruta si es diferente)
+// 1. IMPORTAR AUTH STORE
 import { useAuthStore } from '@/store/auth.store'; 
+// 2. AGREGAR ICONO LogOut
 import { MapPin, ChevronDown, PlusCircle, Bell, User, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { farms, currentFarm, setCurrentFarm, fetchFarms } = useFarmStore();
-  // 2. Obtenemos la función de logout del store (o limpiamos manualmente si no existe)
+  // 3. OBTENER FUNCIÓN LOGOUT
   const logout = useAuthStore((state: any) => state.logout); 
 
   useEffect(() => {
-    // Protección: Solo cargar granjas si hay token (evita el error 401 si recargas)
-    const token = localStorage.getItem('token');
-    if (token) {
-        fetchFarms();
-    }
+    fetchFarms();
   }, []);
 
-  // 3. Función para manejar el cierre de sesión
+  // 4. FUNCIÓN PARA SALIR
   const handleLogout = () => {
-    // A) Si tienes método en el store:
     if (logout) logout();
-    
-    // B) Limpieza manual de seguridad (Respaldo):
-    localStorage.removeItem('token');
-    localStorage.removeItem('user'); // Si guardas datos de usuario
-    
-    // C) Redirección forzada para limpiar estado de memoria
+    localStorage.clear(); // Limpia todo el storage por seguridad
     window.location.href = '/login';
   };
 
   return (
     <nav className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl px-6 flex items-center sticky top-0 z-50">
       
-      {/* --- FARM SWITCHER (IZQUIERDA) --- */}
+      {/* SECCIÓN IZQUIERDA (INTACTA) */}
       <div className="max-w-xs mr-auto"> 
         {farms.length > 0 ? (
           <div className="relative group">
@@ -72,30 +63,24 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* --- RIGHT ACTIONS (DERECHA) --- */}
-      <div className="flex items-center gap-3">
-        {/* Notificaciones */}
-        <button className="text-slate-400 hover:text-white transition-colors relative p-2">
+      {/* SECCIÓN DERECHA (CON EL BOTÓN NUEVO) */}
+      <div className="flex items-center gap-4">
+        <button className="text-slate-400 hover:text-white transition-colors relative">
           <Bell size={20} />
-          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+          <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
         </button>
         
-        {/* Separador vertical visual */}
-        <div className="h-6 w-px bg-slate-800 mx-1"></div>
-
-        {/* Perfil (Solo visual por ahora) */}
-        <div className="h-8 w-8 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 text-slate-400 cursor-default">
+        <div className="h-8 w-8 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700 text-slate-400">
           <User size={16} />
         </div>
 
-        {/* --- BOTÓN DE SALIR (NUEVO) --- */}
+        {/* --- 5. AQUÍ ESTÁ EL BOTÓN DE SALIR --- */}
         <button 
             onClick={handleLogout}
             title="Cerrar Sesión"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20 group"
+            className="text-slate-400 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-all"
         >
-            <span className="text-sm font-medium hidden sm:block group-hover:text-red-400">Salir</span>
-            <LogOut size={18} />
+            <LogOut size={20} />
         </button>
       </div>
     </nav>
