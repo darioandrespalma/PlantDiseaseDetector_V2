@@ -28,7 +28,13 @@ exports.predictDisease = async (req, res) => {
     formData.append('crop', crop);
 
     // --- CORRECCIÓN 1: Apuntar al puerto 5001 (donde corre Python ahora) ---
-    const aiServiceUrl = 'http://127.0.0.1:5001/predict';
+    const IA_BASE_URL = process.env.IA_URL || 'http://127.0.0.1:5001';
+
+    const cleanBaseUrl = IA_BASE_URL.replace(/\/$/, '');
+
+    const aiServiceUrl = `${cleanBaseUrl}/predict`;
+
+    console.log(`📡 Enviando imagen a la IA en: ${aiServiceUrl}`);
     
     const aiResponse = await axios.post(aiServiceUrl, formData, {
       headers: formData.getHeaders() // Headers multipart necesarios
