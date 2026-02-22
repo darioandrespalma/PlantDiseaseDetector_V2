@@ -20,8 +20,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 6. Copiar el código fuente
 COPY . .
 
-# 7. Exponer puerto
-EXPOSE 5001
+# 7. Exponer puerto (Hugging Face usa 7860)
+EXPOSE 7860
 
-# 8. Ejecutar la app
+# 8. Crear un usuario no-root (Requisito de Hugging Face Spaces)
+RUN useradd -m -u 1000 user
+USER user
+
+# 9. Agregar permisos al usuario para el directorio de trabajo
+ENV HOME=/home/user \
+	PATH=/home/user/.local/bin:$PATH
+WORKDIR $HOME/app
+COPY --chown=user . $HOME/app
+
+# 10. Ejecutar la app
 CMD ["python", "app.py"]
