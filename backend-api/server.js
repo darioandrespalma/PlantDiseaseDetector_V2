@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const morgan = require('morgan');
 const path = require('path');
+const fs = require('fs');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 const dailyJob = require('./jobs/dailyCheck');
@@ -61,7 +62,13 @@ app.use(cors({
 app.use(morgan('dev')); 
 app.use(express.json({ limit: '10kb' })); 
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+    console.log('📁 Carpeta "uploads" creada exitosamente.');
+}
+
+app.use('/uploads', express.static(uploadDir));
 
 // ==========================================
 // 3. SEGURIDAD (Sanitización y Protección)
