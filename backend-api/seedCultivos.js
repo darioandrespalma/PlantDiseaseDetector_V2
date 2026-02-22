@@ -63,7 +63,7 @@ const CultivoSchema = new mongoose.Schema({
   
   rendimientoEsperado: {
     toneladasPorHectarea: Number
-  }
+  },
   activo: { type: Boolean, default: true }
 });
 
