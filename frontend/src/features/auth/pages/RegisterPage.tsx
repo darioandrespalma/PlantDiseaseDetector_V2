@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff} from 'lucide-react';
 
 import AuthLayout from '@/shared/components/templates/AuthLayout';
 import { useAuthStore } from '@/store/auth.store';
@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const login = useAuthStore((state) => state.login);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -83,14 +84,23 @@ export default function RegisterPage() {
         {/* INPUT: PASSWORD */}
         <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300 ml-1">Contraseña</label>
-            <input
-                {...register('password')}
-                type="password"
-                placeholder="Mínimo 6 caracteres"
-                className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder:text-gray-500
-                           focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 input-glow
-                           transition-all duration-200"
-            />
+            <div className="relative"> {/* Contenedor relativo para posicionar el icono */}
+                <input
+                    {...register('password')}
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Mínimo 6 caracteres"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder:text-gray-500
+                              focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 input-glow
+                              transition-all duration-200"
+                />
+                <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-3.5 text-gray-500 hover:text-gray-400 transition-colors"
+                >
+                    {showPassword ? <EyeOff /> : <Eye />} {/* Cambiar entre Eye y EyeOff de lucide-react */}
+                </button>
+            </div>
             {errors.password && <p className="text-xs text-red-400 ml-1">{errors.password.message}</p>}
         </div>
 
