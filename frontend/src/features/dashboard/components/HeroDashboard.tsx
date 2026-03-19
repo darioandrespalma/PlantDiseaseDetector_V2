@@ -40,10 +40,10 @@ export default function HeroDashboard() {
         </div>
 
         {/* Contenido Principal del Dashboard */}
-        <div className="relative bg-slate-950/50 aspect-[16/10] p-5 grid grid-cols-12 gap-5">
+        <div className="relative bg-slate-950/50 aspect-[16/10] p-5 flex flex-col lg:grid lg:grid-cols-12 gap-5">
             
             {/* Sidebar (Navegación Simulada) */}
-            <div className="col-span-3 bg-slate-900/60 rounded-xl border border-slate-800/80 p-4 flex flex-col gap-4 backdrop-blur-sm">
+            <div className="hidden lg:flex lg:col-span-3 bg-slate-900/60 rounded-xl border border-slate-800/80 p-4 flex flex-col gap-4 backdrop-blur-sm">
                 <div className="h-10 w-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg mb-4 shadow-lg shadow-purple-500/20 flex items-center justify-center text-white font-bold">P</div>
                 
                 {/* Ítems de Menú Activos/Inactivos */}
@@ -71,11 +71,11 @@ export default function HeroDashboard() {
             </div>
 
             {/* Área Principal */}
-            <div className="col-span-9 flex flex-col gap-5">
+            <div className="flex-1 lg:col-span-9 flex flex-col gap-5">
                 
                 {/* Header Area (Buscador y Perfil) */}
                 <div className="h-14 w-full bg-slate-900/60 rounded-xl border border-slate-800/80 flex items-center px-5 justify-between backdrop-blur-sm">
-                    <div className="flex items-center gap-3 bg-slate-800/50 py-2 px-3 rounded-lg border border-slate-700/30 w-64">
+                    <div className="flex items-center gap-3 bg-slate-800/50 py-2 px-3 rounded-lg border border-slate-700/30 w-full sm:w-64">
                         <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         <div className="h-2 w-32 bg-slate-700/50 rounded-full" />
                     </div>
@@ -85,10 +85,10 @@ export default function HeroDashboard() {
                     </div>
                 </div>
 
-                <div className="flex gap-5 h-full">
+                <div className="flex flex-col lg:flex-row gap-5 h-full">
                     
                     {/* === TARJETA PRINCIPAL: VISUALIZACIÓN DE IA === */}
-                    <div className="flex-[3] bg-slate-900/80 rounded-xl border border-slate-800/80 relative overflow-hidden group-hover:border-purple-500/30 transition-all duration-500 shadow-inner">
+                    <div className="flex-1 lg:flex-[3] bg-slate-900/80 rounded-xl border border-slate-800/80 relative overflow-hidden group-hover:border-purple-500/30 transition-all duration-500 shadow-inner">
                         
                         {/* Imagen de Fondo (Planta) */}
                         <img src={PLANT_IMAGE_URL} alt="Análisis de Hoja" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay grayscale-[30%] group-hover:grayscale-0 transition-all duration-500" />
@@ -118,7 +118,7 @@ export default function HeroDashboard() {
                                 <div className={`absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-purple-500 to-transparent z-20 ${analyzing ? 'animate-scan-down' : 'opacity-0'}`} style={{top: '30%'}} />
                                 
                                 {/* Bounding Box (Cuadro de Detección) */}
-                                <div className={`absolute border-2 border-dashed border-purple-400/70 rounded-lg z-10 transition-all duration-700 ${analyzing ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`} style={{ top: '25%', left: '30%', width: '40%', height: '50%' }}>
+                                <div className={`absolute border-2 border-dashed border-purple-400/70 rounded-lg z-10 transition-all duration-700 ${analyzing ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`} style={{ top: '20%', left: '20%', width: '60%', height: '40%' }}>
                                     {/* Puntos de interés */}
                                     <div className="absolute top-0 left-0 -mt-1 -ml-1 w-2 h-2 bg-purple-500" /><div className="absolute top-0 right-0 -mt-1 -mr-1 w-2 h-2 bg-purple-500" /><div className="absolute bottom-0 left-0 -mb-1 -ml-1 w-2 h-2 bg-purple-500" /><div className="absolute bottom-0 right-0 -mb-1 -mr-1 w-2 h-2 bg-purple-500" />
                                     {/* Etiqueta */}
@@ -130,7 +130,7 @@ export default function HeroDashboard() {
                                 </div>
 
                                 {/* Mapa de Calor Simulado */}
-                                <div className={`absolute bg-red-500/20 blur-xl rounded-full mix-blend-color-dodge transition-all duration-1000 ${analyzing ? 'opacity-0' : 'opacity-60'}`} style={{ top: '35%', left: '40%', width: '20%', height: '30%' }} />
+                                <div className={`absolute bg-red-500/20 blur-xl rounded-full mix-blend-color-dodge transition-all duration-1000 ${analyzing ? 'opacity-0' : 'opacity-60'}`} style={{ top: '30%', left: '30%', width: '40%', height: '40%' }} />
                             </div>
 
 
@@ -154,7 +154,7 @@ export default function HeroDashboard() {
                     </div>
 
                     {/* === COLUMNA DE ESTADÍSTICAS === */}
-                    <div className="flex-[2] flex flex-col gap-4">
+                    <div className="flex-1 lg:flex-[2] flex flex-col gap-4">
                         
                         {/* Mini Gráfico 1: Métricas */}
                         <div className="flex-1 bg-slate-900/60 rounded-xl border border-slate-800/80 p-4 backdrop-blur-sm flex flex-col justify-between">

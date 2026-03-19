@@ -1,27 +1,36 @@
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Lote } from '@/features/farms/lots.service';
 
-// Fix para iconos de Leaflet en React
-import iconMarker from 'leaflet/dist/images/marker-icon.png';
-import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-const DefaultIcon = L.icon({
-    iconRetinaUrl: iconRetina,
-    iconUrl: iconMarker,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
-// Iconos personalizados por estado (Semáforo)
+// Iconos personalizados por estado usando L.divIcon con Tailwind CSS
 const getIconColor = (estado: string) => {
-    // Aquí podrías usar SVGs personalizados de colores
-    // Por simplicidad usaremos el default, pero en PRO usarías iconos verde/rojo
-    return DefaultIcon; 
+    let html = '';
+    if (estado === 'Crítico') {
+        // Círculo rojo con animación de ping
+        html = `
+            <div class="relative w-6 h-6">
+                <div class="absolute inset-0 w-6 h-6 bg-red-500 rounded-full animate-ping opacity-75"></div>
+                <div class="relative w-6 h-6 bg-red-500 rounded-full"></div>
+            </div>
+        `;
+    } else if (estado === 'Sano') {
+        // Círculo verde esmeralda con brillo
+        html = `
+            <div class="w-6 h-6 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+        `;
+    } else {
+        // Estado neutro o por defecto
+        html = `
+            <div class="w-6 h-6 bg-gray-500 rounded-full"></div>
+        `;
+    }
+
+    return L.divIcon({
+        html,
+        className: 'custom-div-icon',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+    });
 };
 
 // Componente para manejar clics en el mapa
