@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import Navbar from '../organisms/Navbar'; // <--- IMPORTAMOS EL NAVBAR AQUÍ
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Sprout, ScanLine, FileText, Settings, Leaf } from 'lucide-react';
+import { useAuthStore } from '@/store/auth.store';
 
 // Si ya tienes tu propio componente Sidebar separado, úsalo. 
 // Si tenías el código del Sidebar "hardcodeado" aquí, asegúrate de no borrarlo.
@@ -13,6 +14,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
+  const { user } = useAuthStore();
 
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Resumen', path: '/dashboard' },
@@ -56,14 +58,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           })}
         </div>
 
-        {/* Footer Sidebar */}
+{/* Footer Sidebar */}
         <div className="p-4 border-t border-slate-800">
           <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800/50">
-            <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-white">
-              D
+            <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-white uppercase">
+              {/* CAMBIADO A user?.name */}
+              {user?.name ? user.name.charAt(0) : 'U'}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-bold text-white truncate">Dario</p>
+              {/* CAMBIADO A user?.name */}
+              <p className="text-xs font-bold text-white truncate">
+                {user?.name || 'Usuario'}
+              </p>
               <p className="text-[10px] text-slate-400 truncate">Plan Free</p>
             </div>
           </div>
