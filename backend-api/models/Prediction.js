@@ -9,7 +9,7 @@ const predictionSchema = new mongoose.Schema({
   },
   crop: {
     type: String,
-    enum: ['banana', 'rice', 'coffee'],
+    enum: ['banana', 'rice', 'coffee', 'apple', 'tomato', 'corn'], // Puedes expandir esta lista según tus cultivos
     required: true
   },
   imagePath: {
