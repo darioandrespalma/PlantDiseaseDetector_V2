@@ -1,9 +1,11 @@
+// src/store/auth.store.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// 1. LA INTERFAZ DEBE COINCIDIR CON LO QUE LE PASAS DESDE EL LOGIN/REGISTER
 interface User {
-  id: string;
-  name: string;
+  id: string;        // Se queda como id porque así lo pasas en login(...)
+  name: string;      // Se queda como name porque así lo pasas en login(...)
   email: string;
   role: string;
 }

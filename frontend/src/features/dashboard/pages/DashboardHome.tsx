@@ -192,7 +192,7 @@ export default function DashboardHome() {
       {/* Header */}
       <div className="mb-8 animate-fade-in-up flex flex-col md:flex-row justify-between md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-2xl md:text-3xl font-bold text-white">
             Hola, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 capitalize">{data?.usuario}</span> 👋
           </h1>
           <p className="text-slate-400 mt-2 flex items-center gap-2">
@@ -238,7 +238,7 @@ export default function DashboardHome() {
                 {data?.lunar.fase}
                 </div>
             </div>
-            <div className="mt-2 text-xs text-indigo-100 bg-white/10 p-3 rounded-lg backdrop-blur-sm border border-white/10 leading-relaxed">
+            <div className="mt-2 text-xs text-indigo-100 bg-white/10 p-3 rounded-lg backdrop-blur-sm border border-white/10 leading-relaxed line-clamp-3">
               <span className="font-bold text-emerald-300">Tip:</span> {data?.lunar.mensaje}
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function DashboardHome() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* COLUMNA 1: Actividad Reciente */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6">
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 min-h-[300px] flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <Activity size={18} className="text-purple-400" />
@@ -294,7 +294,7 @@ export default function DashboardHome() {
         </div>
 
         {/* COLUMNA 2: AGENDA DEL DÍA */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 flex flex-col">
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 flex flex-col min-h-[300px]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <CalendarClock size={18} className="text-blue-400" />
@@ -337,9 +337,9 @@ export default function DashboardHome() {
         </div>
 
         {/* COLUMNA 3: Mapa */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 flex flex-col">
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-6 flex flex-col min-h-[300px]">
            <h3 className="text-lg font-bold text-white mb-4">Mapa de Calor</h3>
-           <div className="flex-1 bg-slate-900 rounded-xl border border-slate-700 relative overflow-hidden group min-h-[150px]">
+           <div className="flex-1 bg-slate-900 rounded-xl border border-slate-700 relative overflow-hidden group min-h-[200px]">
              <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/World_map_blank_without_borders.svg/1000px-World_map_blank_without_borders.svg.png')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-all"></div>
              <div className="absolute inset-0 flex items-center justify-center">
                 <button className="px-4 py-2 bg-slate-800/80 backdrop-blur text-white text-sm rounded-lg border border-slate-600 hover:bg-slate-700 transition-colors">
@@ -362,7 +362,7 @@ function StatCard({ icon, title, value, color, status, badge, pulse }: any) {
   };
 
   return (
-    <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 p-6 rounded-2xl">
+    <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 p-4 sm:p-6 rounded-2xl">
       <div className="flex justify-between items-start mb-4">
         <div className={`p-3 rounded-lg ${colorMap[color]} ${pulse ? 'animate-pulse' : ''}`}>
           {icon}
