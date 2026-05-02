@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react'; // Agregar iconos
 
 import AuthLayout from '@/shared/components/templates/AuthLayout';
 import { useAuthStore } from '@/store/auth.store';
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Nuevo estado
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -75,18 +76,27 @@ export default function LoginPage() {
                     ¿Olvidaste tu contraseña?
                 </Link>
             </div>
-            <input
-                {...register('password')}
-                type="password"
-                placeholder="••••••••••"
-                className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder:text-gray-500
-                           focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 input-glow
-                           transition-all duration-200"
-            />
+            <div className="relative">
+                <input
+                    {...register('password')}
+                    type={showPassword ? 'text' : 'password'} // Alternar entre mostrar y ocultar
+                    placeholder="••••••••••"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder:text-gray-500
+                               focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 input-glow
+                               transition-all duration-200"
+                />
+                <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)} // Cambiar el estado de visibilidad
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                    {showPassword ? <EyeOff /> : <Eye />} {/* Icono para mostrar u ocultar */}
+                </button>
+            </div>
             {errors.password && <p className="text-xs text-red-400 ml-1">{errors.password.message}</p>}
         </div>
 
-        {/* BOTÓN GRADIENTE (Estilo Open) */}
+        {/* BOTÓN GRADIENTE */}
         <button
             type="submit"
             disabled={isLoading}

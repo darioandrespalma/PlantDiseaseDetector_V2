@@ -22,7 +22,7 @@
 | Base de Datos MongoDB | ✅ Activa | Enero 2026 |
 | Autenticación JWT | ✅ Implementado | Enero 2026 |
 | WebSockets (Socket.IO) | ✅ Funcional | Enero 2026 |
-| Predicción IA | ✅ 3 modelos listos | Versión 2.0 |
+| Predicción IA | ✅ 4 modelos listos | Marzo 2026 |
 | Dashboard | ✅ Completo | Enero 2026 |
 | Mapas Interactivos | ✅ Leaflet integrado | Enero 2026 |
 
@@ -30,7 +30,7 @@
 
 ### ✨ Características Principales
 
-- 🤖 **Detección IA Avanzada**: Utiliza modelos pre-entrenados de Redes Neuronales Convolucionales (CNN) para identificar enfermedades en cultivos de Banano, Arroz y Café con una precisión superior al 92%.
+- 🤖 **Detección IA Avanzada**: Utiliza modelos pre-entrenados de Redes Neuronales Convolucionales (CNN) para identificar enfermedades en cultivos de Banano, Arroz, Café y Manzana con una precisión superior al 92%.
 - 🌍 **Gestión Integral de Lotes**: Permite la administración completa de parcelas agrícolas, incluyendo ubicación geográfica GPS, historial de cultivos y análisis de datos históricos para una mejor toma de decisiones.
 - 📊 **Monitoreo Climático en Tiempo Real**: Integra una API de clima que proporciona recomendaciones personalizadas basadas en las condiciones climáticas locales, ayudando a los agricultores a planificar sus actividades.
 - 🌙 **Calendario Lunar Inteligente**: Ofrece recomendaciones de actividades agrícolas basadas en ciclos lunares científicamente validados, optimizando el rendimiento de los cultivos.
@@ -68,7 +68,7 @@ PlantDiseaseDetector_V2/
 │   └── Animations y transiciones suaves
 │
 └── 📁 ia-service-python/        # INTELIGENCIA: Motor de Predicciones con Flask & Keras
-    ├── Modelos pre-entrenados (3 cultivos)
+    ├── Modelos pre-entrenados (4 cultivos)
     ├── Preprocesamiento OpenCV
     ├── Inferencia Keras/TensorFlow
     └── API REST para predicciones
@@ -91,6 +91,7 @@ PlantDiseaseDetector_V2/
 ia-service-python/
 │
 ├── models/                              # Modelos entrenados
+│   ├── apple_leaf_disease_model.keras  # Modelo CNN para enfermedad Manzana
 │   ├── banana_leaf_disease_model.h5    # Modelo CNN para enfermedad Banano
 │   ├── coffee_leaf_disease_model.h5    # Modelo CNN para enfermedad Café
 │   └── arroz_modelo.pkl                # Modelo adicional Arroz (sklearn)
@@ -156,7 +157,7 @@ ia-service-python/
 - WebSocket para actualizaciones en tiempo real
 
 ### Backend → IA Service Python
-- HTTP POST a `localhost:5000/predict`
+- HTTP POST a `localhost:7860/predict`
 - Envía imagen en multipart/form-data
 - Recibe JSON con predicción
 
@@ -407,7 +408,9 @@ npm run lint               # Ejecutar linter
 
 ### Ubicación: `/ia-service-python`
 
-**Estado:** ✅ Activo y funcional con 3 modelos de IA
+**Estado:** ✅ Activo y funcional con 4 modelos de IA
+
+**Nota:** El modelo de Manzana está implementado en el servicio de IA pero requiere actualización del backend y frontend para soporte completo.
 
 **Tecnologías:**
 - Flask 3.0.0 - Framework web ligero
@@ -443,7 +446,18 @@ npm run lint               # Ejecutar linter
 - **Precisión**: > 92%
 - **Framework**: TensorFlow/Keras
 
-#### 3. 🍚 Arroz (Machine Learning Clásico)
+#### 3. 🍎 Manzana (Deep Learning CNN)
+- **Archivo**: `apple_leaf_disease_model.keras`
+- **Arquitectura**: Convolutional Neural Network (CNN)
+- **Input**: Imágenes 224x224x3 (RGB)
+- **Clases**:
+  - `Apple___Apple_scab` - Sarna del manzano
+  - `Apple___Cedar_apple_rust` - Roya del cedro del manzano
+  - `Apple___healthy` - Hoja saludable
+- **Precisión**: > 92%
+- **Framework**: TensorFlow/Keras
+
+#### 4. 🍚 Arroz (Machine Learning Clásico)
 - **Archivo**: `arroz_modelo.pkl`
 - **Arquitectura**: scikit-learn classifier
 - **Input**: Imágenes 100x100 (escala de grises)
@@ -476,16 +490,21 @@ npm run lint               # Ejecutar linter
 ```
 ia-service-python/
 ├── app.py                    # Aplicación principal Flask (130 líneas)
-│                             # - Carga 3 modelos al iniciar
+│                             # - Carga 4 modelos al iniciar
 │                             # - Endpoints POST para predicciones
 │                             # - Manejo de errores
 │
 ├── models/
+│   ├── apple_classes.json     # Clases para modelo de manzana
+│   ├── apple_leaf_disease_model.keras  # CNN para manzana
+│   ├── apple_metadata.json    # Metadatos del modelo manzana
 │   ├── banana_leaf_disease_model.h5    # CNN para banano
 │   ├── coffee_leaf_disease_model.h5    # CNN para café
-│   └── [arroz_modelo.pkl]              # Modelo arroz (si existe)
+│   └── arroz_modelo.pkl       # Modelo arroz (scikit-learn)
 │
 ├── requirements.txt          # Dependencias Python con versiones exactas
+├── Dockerfile                # Contenedorización del servicio
+├── .dockerignore             # Archivos a ignorar en Docker
 └── README.md                 # Documentación específica del servicio
 ```
 
@@ -493,9 +512,7 @@ ia-service-python/
 
 | Método | Endpoint | Descripción | Input |
 |--------|----------|-------------|-------|
-| POST | `/predict/banana` | Predicción para cultivo Banano | Imagen multipart/form-data |
-| POST | `/predict/coffee` | Predicción para cultivo Café | Imagen multipart/form-data |
-| POST | `/predict/rice` | Predicción para cultivo Arroz | Imagen multipart/form-data |
+| POST | `/predict` | Predicción genérica (soporta banana, coffee, rice, apple) | Imagen multipart/form-data + crop |
 | GET | `/health` | Estado del servicio | - |
 
 ### Response Ejemplo
@@ -537,7 +554,7 @@ echo "FRONTEND_URL=http://localhost:5173
 MONGO_URI=mongodb://localhost:27017/plant_disease_detector
 JWT_SECRET=tu_clave_secreta_aqui
 PORT=5000
-IA_SERVICE_URL=http://localhost:5001" > .env
+IA_SERVICE_URL=http://localhost:7860" > .env
 
 # Cargar datos iniciales
 npm run seed
@@ -568,7 +585,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-El servicio se ejecutará en `http://localhost:5001`
+El servicio se ejecutará en `http://localhost:7860`
 
 ---
 
@@ -680,7 +697,7 @@ GET    /news                      - Noticias agrícolas
    - Preview antes de enviar
    - Resultados con confianza %
    - Histórico de predicciones
-   - Soporte para 3 cultivos (Banano, Café, Arroz)
+   - Soporte para 4 cultivos (Banano, Café, Arroz, Manzana)
 
 4. **Gestión de Fincas/Lotes** (`features/farms`)
    - Mapa interactivo con Leaflet
@@ -744,6 +761,7 @@ npm run lint     # ESLint con auto-fix
 |---------|--------|-------|--------|-----------|
 | Banano | CNN Keras | 224x224x3 | 4 | >92% |
 | Café | CNN Keras | 224x224x3 | 3 | >92% |
+| Manzana | CNN Keras | 224x224x3 | 3 | >92% |
 | Arroz | scikit-learn | 100x100 | 3 | - |
 
 **Procesamiento de Imágenes:**
@@ -870,7 +888,7 @@ npm test                  # Tests unitarios
 ## 📱 Características Destacadas
 
 ### Detección Multicanal
-- Soporta 3 cultivos diferentes
+- Soporta 4 cultivos diferentes
 - Cada cultivo tiene modelo entrenado especializado
 - Resultados de confianza en tiempo real
 
@@ -1019,4 +1037,4 @@ Para dudas o problemas, revisa los logs en:
 
 ---
 
-**Última actualización**: 16 de Febrero de 2026 (Documentación Completa)
+**Última actualización**: 18 de Marzo de 2026 (Actualización con modelo Apple)

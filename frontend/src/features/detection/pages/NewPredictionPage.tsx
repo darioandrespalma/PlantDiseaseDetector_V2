@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import DashboardLayout from '@/shared/components/templates/DashboardLayout';
 import { predictionService, PredictionResult } from '../api/prediction.service';
-import { UploadCloud, CheckCircle, AlertTriangle, X, Loader2, Sprout, Coffee, Flower2 } from 'lucide-react';
+import { UploadCloud, CheckCircle, AlertTriangle, X, Loader2, Sprout, Coffee, Flower2, Apple, Leaf, Wheat} from 'lucide-react';
 
 export default function NewPredictionPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -68,13 +68,29 @@ export default function NewPredictionPage() {
   };
 
   // --- Render Helpers ---
+  const CROP_TYPES = ['banana', 'rice', 'coffee', 'apple', 'tomato', 'corn'];
 
   const getCropIcon = (c: string) => {
     switch (c) {
       case 'banana': return <Flower2 className="text-yellow-500" />;
       case 'coffee': return <Coffee className="text-orange-700" />;
       case 'rice': return <Sprout className="text-emerald-500" />;
+      case 'apple': return <Apple className="text-red-500" />;
+      case 'tomato': return <Leaf className="text-red-500" />; 
+      case 'corn': return <Wheat className="text-yellow-400" />;
       default: return <Sprout />;
+    }
+  };
+
+  const getCropName = (c: string) => {
+    switch (c) {
+      case 'banana': return 'Banano';
+      case 'rice': return 'Arroz';
+      case 'coffee': return 'Café';
+      case 'apple': return 'Manzana';
+      case 'tomato': return 'Tomate';
+      case 'corn': return 'Maíz';
+      default: return c;
     }
   };
 
@@ -96,7 +112,7 @@ export default function NewPredictionPage() {
             <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
               <label className="block text-sm font-medium text-slate-300 mb-4">1. Selecciona el Cultivo</label>
               <div className="grid grid-cols-3 gap-3">
-                {['banana', 'rice', 'coffee'].map((c) => (
+                {CROP_TYPES.map((c) => (
                   <button
                     key={c}
                     type="button"
@@ -109,7 +125,7 @@ export default function NewPredictionPage() {
                   >
                     {getCropIcon(c)}
                     <span className="capitalize text-sm font-medium">
-                      {c === 'banana' ? 'Banano' : c === 'rice' ? 'Arroz' : 'Café'}
+                      {getCropName(c)}
                     </span>
                   </button>
                 ))}

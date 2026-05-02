@@ -12,17 +12,41 @@ exports.getRecomendacion = async (req, res) => {
   }
 
   try {
+    // 1. Obtener la matemática pura de tu motor lógico
     const recomendaciones = await matchingEngine.generarRecomendacion(cultivo, lat, lon);
-    const topRecomendaciones = recomendaciones.slice(0, 3);
+    const climaHoy = recomendaciones[0]; // Tomamos el pronóstico y alertas de HOY
     
+    // 2. Empacar los datos crudos para la IA
+    const payloadIA = {
+      cultivo: cultivo,
+      clima: {
+        temp: climaHoy.temp,
+        lluvia: climaHoy.lluvia,
+        condicion: climaHoy.condiciones.temperatura // Info extra que saca tu motor
+      },
+      fase_lunar: climaHoy.faseLunar,
+      alertas_tecnicas: climaHoy.alertas // Ej: ["Riesgo CRÍTICO: Heladas...", "Viento fuerte"]
+    };
+
+    // 3. Enviar a Python (Flask)
+    const IA_BASE_URL = process.env.IA_URL || 'http://127.0.0.1:7860';
+    const aiServiceUrl = `${IA_BASE_URL.replace(/\/$/, '')}/agent/climate`;
+    
+    console.log(`📡 Solicitando redacción al Agente Climático en: ${aiServiceUrl}`);
+    const aiResponse = await axios.post(aiServiceUrl, payloadIA);
+
+
+    // 4. Enviar todo listo al Frontend
     res.json({
       success: true,
       data: {
         cultivo,
         ubicacion: { lat: parseFloat(lat), lon: parseFloat(lon) },
-        topRecomendaciones
+        mensaje_ia: aiResponse.data.agent_response, // El texto redactado por Gemini
+        datos_tecnicos: climaHoy // Para que el frontend pinte los iconos de lluvia/temp
       }
     });
+
   } catch (error) {
     console.error("❌ Error en recomendación:", error.message);
     

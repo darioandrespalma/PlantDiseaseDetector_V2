@@ -4,7 +4,7 @@ import { api } from '@/lib/http/axios';
 export interface PredictionResult {
   _id: string;
   imagePath: string;
-  crop: 'banana' | 'rice' | 'coffee';
+  crop: 'banana' | 'rice' | 'coffee'| 'apple' | 'tomato' | 'corn'; // Asegúrate de que esto coincida con tu modelo Mongoose
   result: {
     disease: string;
     confidence: number;

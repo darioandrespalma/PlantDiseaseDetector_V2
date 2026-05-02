@@ -13,10 +13,10 @@ exports.predictDisease = async (req, res) => {
   }
 
   const { crop, lat, lon } = req.body;
-  if (!crop || !['banana', 'rice', 'coffee'].includes(crop)) {
+  if (!crop || !['banana', 'rice', 'coffee', 'apple', 'tomato', 'corn'].includes(crop)) {
     // Eliminamos el archivo si hay error de validación para no llenar basura
     try { fs.unlinkSync(req.file.path); } catch(e){}
-    return res.status(400).json({ message: 'El campo "crop" es requerido (banana, rice, coffee).' });
+    return res.status(400).json({ message: 'El campo "crop" es requerido (banana, rice, coffee, apple, tomato, corn).' });
   }
 
   const imagePath = req.file.path;
@@ -26,25 +26,23 @@ exports.predictDisease = async (req, res) => {
     const formData = new FormData();
     formData.append('file', fs.createReadStream(imagePath), req.file.filename);
     formData.append('crop', crop);
+    // Le pasamos un query por defecto para el Agente
+    formData.append('query', 'Analiza esta hoja y dame recomendaciones agronómicas.');
 
     // --- CORRECCIÓN 1: Apuntar al puerto 5001 (donde corre Python ahora) ---
-    const IA_BASE_URL = process.env.IA_URL || 'http://127.0.0.1:5001';
-
+    const IA_BASE_URL = process.env.IA_URL || 'http://127.0.0.1:7860';
     const cleanBaseUrl = IA_BASE_URL.replace(/\/$/, '');
+    const aiServiceUrl = `${cleanBaseUrl}/agent/query`;
 
-    const aiServiceUrl = `${cleanBaseUrl}/predict`;
 
-    console.log(`📡 Enviando imagen a la IA en: ${aiServiceUrl}`);
+    console.log(`📡 Enviando imagen al AGENTE IA en: ${aiServiceUrl}`);
     
     const aiResponse = await axios.post(aiServiceUrl, formData, {
       headers: formData.getHeaders() // Headers multipart necesarios
     });
 
-    // 3. Generar recomendaciones (Tu Python no las envía, así que las simulamos aquí o ponemos un default)
-    // Esto evita que falle al guardar en Mongo si el campo es obligatorio
-    const defaultRecs = aiResponse.data.prediction === 'healthy' 
-        ? ['Continuar con el monitoreo regular.', 'Mantener buenas prácticas de riego.']
-        : ['Aislar la planta afectada.', 'Consultar con un agrónomo para fungicidas específicos.'];
+    // 3. Extraer la respuesta de la estructura del Agente
+    const agentData = aiResponse.data;
 
     // --- Construir Objeto de Ubicación ---
     let locationData = undefined;
@@ -63,10 +61,10 @@ exports.predictDisease = async (req, res) => {
       crop: crop,
       location: locationData, // <--- Guardamos ubicación
       result: {
-        disease: aiResponse.data.prediction,
-        confidence: aiResponse.data.confidence,
-        // Usamos lo que venga de Python, o el default si no existe
-        recommendations: aiResponse.data.recommendations || defaultRecs 
+        disease: agentData.technical_data.prediction,
+        confidence: agentData.technical_data.confidence_percent, // Escala 0-100 real
+        // Guardamos el texto redactado por Gemini/Fallback como un array para el Frontend
+        recommendations: [agentData.agent_response]
       }
     });
 
